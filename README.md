@@ -25,29 +25,3 @@ dormitory-management/
 ├── docs/              # 项目文档
 └── README.md          # 项目说明
 ```
-
-## 快速开始
-
-### 后端启动
-```bash
-cd backend
-mvn clean install
-mvn spring-boot:run
-```
-
-### 前端启动
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 数据库初始化
-```bash
-# 执行 database/init.sql 脚本
-```
-
-## 开发规范
-- 后端API遵循RESTful规范
-- 前端组件命名使用PascalCase
-- 代码提交前需要格式化和lint检查
