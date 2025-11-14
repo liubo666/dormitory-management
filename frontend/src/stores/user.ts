@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { login, logout, getCurrentUserInfo, refreshToken, type LoginParams, type UserInfo } from '@/api/user'
+import { login, logout, getCurrentUserInfo, refreshToken as refreshAuthToken, type LoginParams, type UserInfo } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
   // 状态
@@ -84,7 +84,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       loading.value = true
-      const response = await refreshToken(refreshToken.value)
+      const response = await refreshAuthToken(refreshToken.value)
 
       // 更新token
       token.value = response.token

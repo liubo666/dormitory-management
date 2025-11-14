@@ -49,8 +49,8 @@ export function getCurrentUserInfo(): Promise<UserInfo> {
 /**
  * 刷新访问Token
  */
-export function refreshToken(refreshToken: string): Promise<LoginResponse> {
+export function refreshToken(refreshTokenValue: string): Promise<LoginResponse> {
   return request.post('/user/refresh', null, {
-    params: { refreshToken }
+    params: { refreshToken: refreshTokenValue }
   })
 }

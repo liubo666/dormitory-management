@@ -549,7 +549,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import {
   House,
   Plus,
@@ -675,6 +675,7 @@ const checkoutForm = reactive({
 })
 
 // 选项数据
+const buildingOptions = ref<{label: string, value: string}[]>([])
 const dormitoryOptions = ref<{label: string, value: string}[]>([])
 const bedOptions = ref<{label: string, value: string}[]>([])
 const studentOptions = ref<{label: string, value: string}[]>([])
@@ -951,21 +952,15 @@ const handleAssign = (row: CheckIn) => {
 const handleBuildingChange = () => {
   assignForm.dormitoryId = ''
   assignForm.bedId = ''
-  dormitoryOptions.value = [
-    { label: '101房间', value: '1' },
-    { label: '102房间', value: '2' }
-  ]
+  // TODO: 应该调用后端接口获取该楼栋下的宿舍列表
+  dormitoryOptions.value = []
   bedOptions.value = []
 }
 
 const handleDormitoryChange = () => {
   assignForm.bedId = ''
-  bedOptions.value = [
-    { label: '1号床', value: '1' },
-    { label: '2号床', value: '2' },
-    { label: '3号床', value: '3' },
-    { label: '4号床', value: '4' }
-  ]
+  // TODO: 应该调用后端接口获取该宿舍的可用床位列表
+  bedOptions.value = []
 }
 
 const handleSubmitAssignment = async () => {
