@@ -1,12 +1,11 @@
 package com.dormitory.management.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dormitory.management.dto.AvailableBedDTO;
-import com.dormitory.management.dto.AvailableStudentDTO;
-import com.dormitory.management.dto.CheckInDTO;
-import com.dormitory.management.dto.CheckInPageDTO;
+import com.dormitory.management.dto.*;
 import com.dormitory.management.entity.Bed;
 import com.dormitory.management.entity.CheckIn;
 import com.dormitory.management.entity.Dormitory;
@@ -216,7 +215,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             Student student = new Student();
             student.setId(checkIn.getStudentId());
             student.setDormitoryId(dormitoryId);
-            student.setBedNo(bedNo);
+//            student.setBedNo(bedNo);
             student.setUpdateBy(updateBy);
             student.setUpdateTime(LocalDateTime.now());
             studentMapper.updateById(student);
@@ -244,7 +243,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
 
         // 更新入住记录
         checkIn.setStatus(2); // 已退宿
-        checkIn.setActualCheckoutDate(LocalDateTime.now());
+//        checkIn.setActualCheckoutDate(LocalDateTime.now());
         checkIn.setCheckoutReason(checkoutReason);
         checkIn.setUpdateTime(LocalDateTime.now());
         checkIn.setUpdateBy(updateBy);
@@ -256,7 +255,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             Student student = new Student();
             student.setId(checkIn.getStudentId());
             student.setDormitoryId(null);
-            student.setBedNo(null);
+//            student.setBedNo(null);
             student.setUpdateBy(updateBy);
             student.setUpdateTime(LocalDateTime.now());
             studentMapper.updateById(student);
@@ -437,110 +436,52 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
     }
 
     @Override
-    public List<AvailableStudentDTO> getAvailableStudents(String keyword) {
-        List<AvailableStudentDTO> result = new ArrayList<>();
+    public Page<AvailableStudentDTO> getAvailableStudents(CheckInResDTO dto) {
 
-        // 查询所有在校学生（status = 1 表示在校）
         LambdaQueryWrapper<Student> studentWrapper = new LambdaQueryWrapper<>();
-        studentWrapper.eq(Student::getStatus, 1)
-                     .eq(Student::getDeleted, 0);
+         studentWrapper.eq(Student::getStatus, 1)
+                .in(Student::getCheckInStatus, Arrays.asList(0,3,4));
 
-        if (StringUtils.hasText(keyword)) {
+        if (StringUtils.hasText(dto.getKeyword())) {
             studentWrapper.and(wrapper -> wrapper
-                .like(Student::getName, keyword)
+                .like(Student::getName, dto.getKeyword())
                 .or()
-                .like(Student::getStudentNo, keyword)
+                .like(Student::getStudentNo, dto.getKeyword())
             );
         }
+        Page<Student> studentPage = studentMapper.selectPage(new Page<>(dto.getPageIndex(), dto.getPageSize()), studentWrapper);
 
-        List<Student> allStudents = studentMapper.selectList(studentWrapper);
+        Page<AvailableStudentDTO> voPage = new Page<>(dto.getPageIndex(), dto.getPageSize());
+        voPage.setTotal(studentPage.getTotal());
 
-        // 查询已入住学生的ID列表
-        LambdaQueryWrapper<CheckIn> checkInWrapper = new LambdaQueryWrapper<>();
-        checkInWrapper.select(CheckIn::getStudentId)
-                     .in(CheckIn::getStatus, Arrays.asList(0, 1)) // 申请中和已入住
-                     .eq(CheckIn::getDeleted, 0);
-
-        List<CheckIn> checkedInStudents = baseMapper.selectList(checkInWrapper);
-        Set<Long> checkedInStudentIds = checkedInStudents.stream()
-                .map(CheckIn::getStudentId)
-                .collect(Collectors.toSet());
-
-        // 过滤出未入住的学生
-        for (Student student : allStudents) {
-            if (!checkedInStudentIds.contains(student.getId())) {
-                AvailableStudentDTO studentDTO = new AvailableStudentDTO();
-                studentDTO.setId(student.getId());
-                studentDTO.setStudentNo(student.getStudentNo());
-                studentDTO.setName(student.getName());
-                studentDTO.setGender(student.getGender());
-                studentDTO.setCollege(student.getCollege());
-                studentDTO.setMajor(student.getMajor());
-                studentDTO.setClassName(student.getClassName());
-                result.add(studentDTO);
-            }
-        }
-
-        return result;
+        voPage.setRecords(BeanUtil.copyToList(studentPage.getRecords(),AvailableStudentDTO.class));
+        return voPage;
     }
 
     @Override
-    public List<AvailableBedDTO> getAvailableBeds() {
+    public List<AvailableBedDTO> getAvailableBeds(String  keyword) {
         List<AvailableBedDTO> result = new ArrayList<>();
 
         // 查询所有可用宿舍（status = 1 表示可用）
         LambdaQueryWrapper<Dormitory> dormitoryWrapper = new LambdaQueryWrapper<>();
         dormitoryWrapper.eq(Dormitory::getStatus, 1)
-                       .eq(Dormitory::getDeleted, 0)
-                       .orderByAsc(Dormitory::getRoomNo);
-
+                .like(org.apache.commons.lang3.StringUtils.isNotBlank(keyword),Dormitory::getRoomNo,keyword)
+                       .eq(Dormitory::getDeleted, 0).last("limit 10");
         List<Dormitory> dormitories = dormitoryMapper.selectList(dormitoryWrapper);
 
         for (Dormitory dormitory : dormitories) {
-            // 查询该宿舍的所有可用床位
-            LambdaQueryWrapper<Bed> bedWrapper = new LambdaQueryWrapper<>();
-            bedWrapper.eq(Bed::getDormitoryId, dormitory.getId())
-                     .eq(Bed::getStatus, 1) // 可用状态
-                     .orderByAsc(Bed::getBedNo);
-
-            List<Bed> beds = bedMapper.selectList(bedWrapper);
-
-            // 查询该宿舍已入住的床位ID
-            LambdaQueryWrapper<CheckIn> checkInWrapper = new LambdaQueryWrapper<>();
-            checkInWrapper.select(CheckIn::getBedId)
-                         .eq(CheckIn::getStatus, 1) // 已入住
-                         .eq(CheckIn::getDeleted, 0);
-
-            List<CheckIn> occupiedBeds = baseMapper.selectList(checkInWrapper);
-            Set<Long> occupiedBedIds = occupiedBeds.stream()
-                    .map(CheckIn::getBedId)
-                    .collect(Collectors.toSet());
-
-            // 过滤出空闲床位
-            List<AvailableBedDTO.BedInfoDTO> availableBeds = new ArrayList<>();
-            for (Bed bed : beds) {
-                if (!occupiedBedIds.contains(bed.getId())) {
-                    AvailableBedDTO.BedInfoDTO bedInfo = new AvailableBedDTO.BedInfoDTO();
-                    bedInfo.setId(bed.getId());
-                    bedInfo.setBedNo(bed.getBedNo());
-                    bedInfo.setStatus(bed.getStatus());
-                    bedInfo.setDormitoryId(bed.getDormitoryId());
-                    availableBeds.add(bedInfo);
-                }
-            }
-
-            // 如果该宿舍有可用床位，则添加到结果中
-            if (!availableBeds.isEmpty()) {
-                AvailableBedDTO dormitoryDTO = new AvailableBedDTO();
-//                dormitoryDTO.setBuildingId(dormitory.getBuildingId());
-                dormitoryDTO.setBuildingName("A1栋"); // 这里需要关联查询楼栋信息，暂时写死
-                dormitoryDTO.setDormitoryId(dormitory.getId());
-                dormitoryDTO.setDormitoryNo(dormitory.getRoomNo());
-                dormitoryDTO.setBedList(availableBeds);
-                result.add(dormitoryDTO);
-            }
+            AvailableBedDTO availableBedDTO = BeanUtil.copyProperties(dormitory, AvailableBedDTO.class);
+            availableBedDTO.setDormitoryId(dormitory.getId());
+            List<Bed> beds = bedMapper.selectList(Wrappers.<Bed>lambdaQuery()
+                    .eq(Bed::getStatus, 1).eq(Bed::getDormitoryId,dormitory.getId()));
+            List<BedInfoDTO> collect = beds.stream().map(v -> {
+                BedInfoDTO bedInfoDTO = BeanUtil.copyProperties(v, BedInfoDTO.class);
+                bedInfoDTO.setBedId(v.getId());
+                return bedInfoDTO;
+            }).collect(Collectors.toList());
+            availableBedDTO.setBedList(collect);
+            result.add(availableBedDTO);
         }
-
         return result;
     }
 }

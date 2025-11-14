@@ -23,7 +23,7 @@ public interface StudentService extends IService<Student> {
      * @param pageDTO 查询条件
      * @return 分页结果
      */
-    Page<StudentVO> getStudentPage(Page<StudentVO> page, StudentPageDTO pageDTO);
+    Page<StudentVO> getStudentPage( StudentPageDTO pageDTO);
 
     /**
      * 根据ID获取学生详情

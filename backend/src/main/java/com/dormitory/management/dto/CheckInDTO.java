@@ -5,6 +5,8 @@ import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -50,18 +52,14 @@ public class CheckInDTO {
      * 入住日期
      */
     @NotNull(message = "入住日期不能为空")
-    private LocalDateTime checkInDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDate checkInDate;
 
     /**
      * 预计退宿日期
      */
     private LocalDateTime expectedCheckoutDate;
 
-    /**
-     * 入住状态(0:申请中,1:已入住,2:已退宿,3:已拒绝)
-     */
-    @NotNull(message = "入住状态不能为空")
-    private Integer status;
 
     /**
      * 申请原因

@@ -12,57 +12,38 @@ import java.util.List;
 public class AvailableBedDTO {
 
     /**
-     * 楼栋ID
+     * 宿舍ID
      */
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long buildingId;
+    private Long dormitoryId;
+
+
+    /**
+     * 楼栋号
+     */
+    private String buildingNo;
 
     /**
      * 楼栋名称
      */
     private String buildingName;
 
-    /**
-     * 宿舍ID
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long dormitoryId;
+
 
     /**
-     * 宿舍号
+     * 房间号
      */
-    private String dormitoryNo;
+    private String roomNo;
+
+    /**
+     * 楼层
+     */
+    private Integer floorNumber;
 
     /**
      * 可用床位列表
      */
     private List<BedInfoDTO> bedList;
 
-    /**
-     * 床位信息DTO
-     */
-    @Data
-    public static class BedInfoDTO {
-        /**
-         * 床位ID
-         */
-        @JsonFormat(shape = JsonFormat.Shape.STRING)
-        private Long id;
 
-        /**
-         * 床位号
-         */
-        private String bedNo;
-
-        /**
-         * 状态
-         */
-        private Integer status;
-
-        /**
-         * 宿舍ID
-         */
-        @JsonFormat(shape = JsonFormat.Shape.STRING)
-        private Long dormitoryId;
-    }
 }

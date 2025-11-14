@@ -129,10 +129,10 @@
               clearable
               style="width: 150px"
             >
-              <el-option label="申请中" :value="0" />
-              <el-option label="已入住" :value="1" />
-              <el-option label="已退宿" :value="2" />
-              <el-option label="已拒绝" :value="3" />
+              <el-option label="申请中" :value="1" />
+              <el-option label="已入住" :value="2" />
+              <el-option label="已退宿" :value="3" />
+              <el-option label="已拒绝" :value="4" />
             </el-select>
           </el-form-item>
           <el-form-item label="入住日期">
@@ -323,7 +323,7 @@
         <el-form-item label="床位选择" prop="bedId">
           <el-cascader
             v-model="selectedBedPath"
-            placeholder="请选择楼栋-宿舍-床位"
+            placeholder="请选择宿舍-床位"
             :options="availableBedOptions"
             :props="{
               expandTrigger: 'hover',
@@ -578,7 +578,7 @@ import {
   getAvailableStudents,
   getAvailableBeds
 } from '@/api/checkIn'
-import type { CheckIn, CheckInForm, CheckInParams } from '@/api/checkIn'
+import type { CheckIn, CheckInForm, CheckInParams, AvailableStudentsParams, AvailableStudentsResponse } from '@/api/checkIn'
 
 // 响应式数据
 const loading = ref(false)
@@ -707,10 +707,10 @@ const assignRules = {
 // 获取状态类型
 const getStatusType = (status: number) => {
   switch (status) {
-    case 0: return 'warning'
-    case 1: return 'success'
-    case 2: return 'info'
-    case 3: return 'danger'
+    case 1: return 'warning'
+    case 2: return 'success'
+    case 3: return 'info'
+    case 4: return 'danger'
     default: return 'info'
   }
 }
@@ -753,8 +753,13 @@ const loadStatistics = async () => {
 const searchStudents = async (query: string) => {
   searchingStudents.value = true
   try {
-    const students = await getAvailableStudents(query)
-    studentOptions.value = students.map(student => ({
+    const params: AvailableStudentsParams = {
+      pageIndex: 1,
+      pageSize: 50,
+      keyword: query
+    }
+    const response: AvailableStudentsResponse = await getAvailableStudents(params)
+    studentOptions.value = response.records.map(student => ({
       label: `${student.name} (${student.studentNo}) - ${student.college}${student.major}`,
       value: student.id
     }))
@@ -770,18 +775,14 @@ const searchStudents = async (query: string) => {
 // 加载可用床位
 const loadAvailableBeds = async () => {
   try {
-    const beds = await getAvailableBeds()
-    availableBedOptions.value = beds.map(building => ({
-      value: building.buildingId,
-      label: building.buildingName,
-      children: building.bedList.length > 0 ? [{
-        value: building.dormitoryId,
-        label: building.dormitoryNo,
-        children: building.bedList.map(bed => ({
-          value: bed.id,
-          label: bed.bedNo
-        }))
-      }] : []
+    const beds = await getAvailableBeds('')
+    availableBedOptions.value = beds.map(dorm => ({
+      value: dorm.dormitoryId,
+      label: `${dorm.buildingName} - ${dorm.roomNo}`,
+      children: dorm.bedList.length > 0 ? dorm.bedList.map(bed => ({
+        value: bed.bedId,  // 使用床位ID作为值
+        label: bed.bedNo   // 使用床位号作为显示文本
+      })) : []
     }))
   } catch (error) {
     console.error(error)
@@ -791,19 +792,17 @@ const loadAvailableBeds = async () => {
 
 // 床位选择处理
 const handleBedSelection = (value: string[]) => {
-  if (value && value.length === 3) {
-    applicationForm.bedId = value[2]
-    applicationForm.dormitoryId = value[1]
+  console.log(value);
+  if (value && value.length === 2) {
+    applicationForm.dormitoryId = value[0]  // 宿舍ID
+    applicationForm.bedId = value[1]       // 床位ID（来自后端的bedId字段）
 
     // 找到对应的床位号
-    const building = availableBedOptions.value.find(b => b.value === value[0])
-    if (building && building.children) {
-      const dormitory = building.children.find(d => d.value === value[1])
-      if (dormitory && dormitory.children) {
-        const bed = dormitory.children.find(bed => bed.value === value[2])
-        if (bed) {
-          applicationForm.bedNo = bed.label
-        }
+    const dormitory = availableBedOptions.value.find(d => d.value === value[0])
+    if (dormitory && dormitory.children) {
+      const bed = dormitory.children.find(bed => bed.value === value[1])
+      if (bed) {
+        applicationForm.bedNo = bed.label   // 床位号（显示文本）
       }
     }
   } else {

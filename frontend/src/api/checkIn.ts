@@ -182,37 +182,55 @@ export function getCheckInByBedId(bedId: string): Promise<CheckIn> {
   return request.get(`/check-in/bed/${bedId}`)
 }
 
+// 可申请学生查询参数
+export interface AvailableStudentsParams {
+  pageIndex?: number
+  pageSize?: number
+  keyword?: string
+}
+
+// 可申请学生响应
+export interface AvailableStudentsResponse {
+  records: Array<{
+    id: string
+    studentNo: string
+    name: string
+    gender: number
+    college: string
+    major: string
+    className: string
+  }>
+  total: number
+  current: number
+  size: number
+}
+
 /**
  * 获取可申请入住的学生列表（在校生且未入住）
  */
-export function getAvailableStudents(keyword?: string): Promise<Array<{
-  id: string
-  studentNo: string
-  name: string
-  gender: number
-  college: string
-  major: string
-  className: string
-}>> {
-  return request.get('/check-in/available-students', {
-    params: { keyword }
-  })
+export function getAvailableStudents(params?: AvailableStudentsParams): Promise<AvailableStudentsResponse> {
+  return request.post('/check-in/available-students', params || {})
 }
 
 /**
  * 获取可用床位列表（有空闲床位的宿舍）
  */
-export function getAvailableBeds(): Promise<Array<{
-  buildingId: string
-  buildingName: string
+export function getAvailableBeds(keyword: string = ''): Promise<Array<{
   dormitoryId: string
-  dormitoryNo: string
+  buildingNo: string
+  buildingName: string
+  roomNo: string
+  floorNumber: number
   bedList: Array<{
-    id: string
-    bedNo: string
+    bedId: string  // 床位ID，用于提交表单
+    bedNo: string  // 床位号，用于显示
     status: number
-    dormitoryId: string
+    description?: string
+    isOccupied?: boolean
+    statusText?: string
   }>
 }>> {
-  return request.get('/check-in/available-beds')
+  return request.get('/check-in/available-beds', {
+    params: { keyword }
+  })
 }

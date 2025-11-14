@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -39,23 +40,32 @@ public class CheckIn implements Serializable {
     private Long bedId;
 
 
+
+    /**
+     * 床位ID
+     */
+    @TableField("dormitory_id")
+    private Long dormitoryId;
+
+
+
     /**
      * 入住日期
      */
     @TableField("check_in_date")
-    private LocalDateTime checkInDate;
+    private LocalDate checkInDate;
 
     /**
      * 预计退宿日期
      */
     @TableField("expected_checkout_date")
-    private LocalDateTime expectedCheckoutDate;
+    private LocalDate expectedCheckoutDate;
 
     /**
      * 实际退宿日期
      */
     @TableField("actual_checkout_date")
-    private LocalDateTime actualCheckoutDate;
+    private LocalDate actualCheckoutDate;
 
     /**
      * 入住状态(0:申请中,1:已入住,2:已退宿,3:已拒绝)

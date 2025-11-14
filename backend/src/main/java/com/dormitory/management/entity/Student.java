@@ -101,9 +101,9 @@ public class Student implements Serializable {
     private String dormitoryId;
 
     /**
-     * 床位号
-     */
-    private String bedNo;
+//     * 床位号
+//     */
+//    private String bedNo;
 
     /**
      * 学生状态(0:休学,1:在校,2:毕业,3:退学)
@@ -130,6 +130,12 @@ public class Student implements Serializable {
      */
     private String remark;
 
+
+    /**
+     * 0待分配  1:申请中2:已入住,3已退宿,4:已拒绝
+     */
+
+    private Integer  checkInStatus;
     /**
      * 创建时间
      */

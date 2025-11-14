@@ -126,9 +126,9 @@
           <el-table-column prop="major" label="专业" min-width="150" />
           <el-table-column prop="className" label="班级" width="120" />
           <el-table-column prop="grade" label="年级" width="100" />
-          <el-table-column prop="buildingName" label="楼栋" width="100" />
-          <el-table-column prop="roomNo" label="房间号" width="100" />
-          <el-table-column prop="bedNo" label="床位号" width="100" />
+<!--          <el-table-column prop="buildingName" label="楼栋" width="100" />-->
+<!--          <el-table-column prop="roomNo" label="房间号" width="100" />-->
+<!--          <el-table-column prop="bedNo" label="床位号" width="100" />-->
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag :type="getStatusType(row.status)">

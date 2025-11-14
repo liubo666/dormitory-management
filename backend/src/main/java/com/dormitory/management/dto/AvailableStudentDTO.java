@@ -1,5 +1,6 @@
 package com.dormitory.management.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ public class AvailableStudentDTO {
     /**
      * 学生ID
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     /**

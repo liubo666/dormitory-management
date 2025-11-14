@@ -2,10 +2,7 @@ package com.dormitory.management.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dormitory.management.dto.CheckInDTO;
-import com.dormitory.management.dto.CheckInPageDTO;
-import com.dormitory.management.dto.AvailableStudentDTO;
-import com.dormitory.management.dto.AvailableBedDTO;
+import com.dormitory.management.dto.*;
 import com.dormitory.management.entity.CheckIn;
 import com.dormitory.management.vo.CheckInVO;
 
@@ -80,10 +77,10 @@ public interface CheckInService extends IService<CheckIn> {
     /**
      * 获取可申请入住的学生列表（在校生且未入住）
      */
-    List<AvailableStudentDTO> getAvailableStudents(String keyword);
+    Page<AvailableStudentDTO> getAvailableStudents(CheckInResDTO dto);
 
     /**
      * 获取可用床位列表（有空闲床位的宿舍）
      */
-    List<AvailableBedDTO> getAvailableBeds();
+    List<AvailableBedDTO> getAvailableBeds(String  keyword  );
 }

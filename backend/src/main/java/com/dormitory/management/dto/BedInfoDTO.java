@@ -1,10 +1,14 @@
 package com.dormitory.management.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
 @Data
 public class BedInfoDTO implements Serializable {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private  Long bedId;
 
     /**
      * 床位号

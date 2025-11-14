@@ -684,7 +684,6 @@ const getBedStatusText = (status: number) => {
   switch (status) {
     case 1: return '可用'
     case 2: return '已占用'
-    case 0: return '维修中'
     default: return '未知'
   }
 }

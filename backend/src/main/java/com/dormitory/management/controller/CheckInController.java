@@ -3,10 +3,7 @@ package com.dormitory.management.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dormitory.management.common.Result;
 import com.dormitory.management.context.UserContext;
-import com.dormitory.management.dto.AvailableBedDTO;
-import com.dormitory.management.dto.AvailableStudentDTO;
-import com.dormitory.management.dto.CheckInDTO;
-import com.dormitory.management.dto.CheckInPageDTO;
+import com.dormitory.management.dto.*;
 import com.dormitory.management.service.CheckInService;
 import com.dormitory.management.vo.CheckInVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -195,17 +192,15 @@ public class CheckInController {
     }
 
     @Operation(summary = "获取可申请入住的学生列表（在校生且未入住）")
-    @GetMapping("/available-students")
-    public Result<List<AvailableStudentDTO>> getAvailableStudents(
-            @Parameter(description = "搜索关键字") @RequestParam(required = false) String keyword) {
-        List<AvailableStudentDTO> students = checkInService.getAvailableStudents(keyword);
-        return Result.success(students);
+    @PostMapping("/available-students")
+    public Result<Page<AvailableStudentDTO>> getAvailableStudents(@RequestBody CheckInResDTO dto) {
+        return Result.success(checkInService.getAvailableStudents(dto));
     }
 
     @Operation(summary = "获取可用床位列表（有空闲床位的宿舍）")
     @GetMapping("/available-beds")
-    public Result<List<AvailableBedDTO>> getAvailableBeds() {
-        List<AvailableBedDTO> beds = checkInService.getAvailableBeds();
+    public Result<List<AvailableBedDTO>> getAvailableBeds(@RequestParam(value = "keyword",required = false) String keyword) {
+        List<AvailableBedDTO> beds = checkInService.getAvailableBeds(keyword);
         return Result.success(beds);
     }
 }

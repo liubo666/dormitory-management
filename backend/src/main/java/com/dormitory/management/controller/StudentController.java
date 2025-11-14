@@ -32,7 +32,6 @@ public class StudentController {
 
     private final StudentService studentService;
     private final DormitoryService dormitoryService;
-    private final SysUserService sysUserService;
 
     /**
      * 获取当前用户名
@@ -45,8 +44,7 @@ public class StudentController {
     @Operation(summary = "分页查询学生列表")
     @PostMapping("/page")
     public Result<Page<StudentVO>> getStudentPage(@RequestBody StudentPageDTO pageDTO) {
-        Page<StudentVO> page = new Page<>(pageDTO.getCurrent(), pageDTO.getSize());
-        Page<StudentVO> result = studentService.getStudentPage(page, pageDTO);
+        Page<StudentVO> result = studentService.getStudentPage( pageDTO);
         return Result.success(result);
     }
 

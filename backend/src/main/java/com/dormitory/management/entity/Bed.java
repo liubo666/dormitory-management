@@ -35,7 +35,7 @@ public class Bed {
     private String bedNo;
 
     /**
-     * 床位状态(0:可用,1:已占用,2:维修中)
+     *床位状态(1:可用,2:已占用)
      */
     @TableField("status")
     private Integer status;

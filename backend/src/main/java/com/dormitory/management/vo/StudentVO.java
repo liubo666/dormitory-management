@@ -15,7 +15,8 @@ public class StudentVO {
     /**
      * 学生ID
      */
-    private String id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
 
     /**
      * 学号
@@ -42,11 +43,11 @@ public class StudentVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-
-    /**
-     * 年龄
-     */
-    private Integer age;
+//
+//    /**
+//     * 年龄
+//     */
+//    private Integer age;
 
     /**
      * 身份证号
@@ -166,4 +167,7 @@ public class StudentVO {
      * 更新人
      */
     private String updateBy;
+
+
+
 }

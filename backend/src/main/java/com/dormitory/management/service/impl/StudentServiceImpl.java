@@ -38,7 +38,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     private final DormitoryMapper dormitoryMapper;
 
     @Override
-    public Page<StudentVO> getStudentPage(Page<StudentVO> page, StudentPageDTO pageDTO) {
+    public Page<StudentVO> getStudentPage( StudentPageDTO pageDTO) {
         // 使用MyBatis-Plus的LambdaQueryWrapper构建查询条件
         LambdaQueryWrapper<Student> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Student::getDeleted, 0);
@@ -83,7 +83,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         queryWrapper.orderByAsc(Student::getStudentNo);
 
         // 查询学生列表
-        Page<Student> studentPage = this.page(new Page<>(page.getCurrent(), page.getSize()), queryWrapper);
+        Page<Student> studentPage = this.page(new Page<>(pageDTO.getCurrent(), pageDTO.getSize()), queryWrapper);
 
         // 转换为VO对象
         List<StudentVO> studentVOList = studentPage.getRecords().stream()
@@ -91,7 +91,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
                 .collect(Collectors.toList());
 
         // 构建返回结果
-        Page<StudentVO> result = new Page<>(page.getCurrent(), page.getSize(), studentPage.getTotal());
+        Page<StudentVO> result = new Page<>(pageDTO.getCurrent(), pageDTO.getSize(), studentPage.getTotal());
         result.setRecords(studentVOList);
 
         return result;
@@ -233,35 +233,35 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         }
 
         // 检查床位是否已被占用
-        LambdaQueryWrapper<Student> bedQuery = new LambdaQueryWrapper<>();
-        bedQuery.eq(Student::getDormitoryId, assignmentDTO.getDormitoryId())
-               .eq(Student::getBedNo, assignmentDTO.getBedNo())
-               .eq(Student::getDeleted, 0);
-        Student bedStudent = this.getOne(bedQuery);
-        if (bedStudent != null) {
-            throw new RuntimeException("该床位已被其他学生占用");
-        }
+//        LambdaQueryWrapper<Student> bedQuery = new LambdaQueryWrapper<>();
+//        bedQuery.eq(Student::getDormitoryId, assignmentDTO.getDormitoryId())
+//               .eq(Student::getBedNo, assignmentDTO.getBedNo())
+//               .eq(Student::getDeleted, 0);
+//        Student bedStudent = this.getOne(bedQuery);
+//        if (bedStudent != null) {
+//            throw new RuntimeException("该床位已被其他学生占用");
+//        }
+//
+//        // 分配宿舍
+//        LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
+//        updateWrapper.eq(Student::getId, assignmentDTO.getStudentId())
+//                    .set(Student::getDormitoryId, assignmentDTO.getDormitoryId())
+//                    .set(Student::getBedNo, assignmentDTO.getBedNo())
+//                    .set(Student::getUpdateTime, LocalDateTime.now())
+//                    .set(Student::getUpdateBy, updateBy);
 
-        // 分配宿舍
-        LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Student::getId, assignmentDTO.getStudentId())
-                    .set(Student::getDormitoryId, assignmentDTO.getDormitoryId())
-                    .set(Student::getBedNo, assignmentDTO.getBedNo())
-                    .set(Student::getUpdateTime, LocalDateTime.now())
-                    .set(Student::getUpdateBy, updateBy);
+//        boolean result = this.update(updateWrapper);
+//
+//        if (result) {
+//            // 更新宿舍入住人数
+//            LambdaUpdateWrapper<Dormitory> dormitoryUpdate = new LambdaUpdateWrapper<>();
+//            dormitoryUpdate.eq(Dormitory::getId, assignmentDTO.getDormitoryId())
+//                          .set(Dormitory::getOccupiedBeds, dormitory.getOccupiedBeds() + 1)
+//                          .set(Dormitory::getUpdateTime, LocalDateTime.now());
+//            dormitoryMapper.update(null, dormitoryUpdate);
+//        }
 
-        boolean result = this.update(updateWrapper);
-
-        if (result) {
-            // 更新宿舍入住人数
-            LambdaUpdateWrapper<Dormitory> dormitoryUpdate = new LambdaUpdateWrapper<>();
-            dormitoryUpdate.eq(Dormitory::getId, assignmentDTO.getDormitoryId())
-                          .set(Dormitory::getOccupiedBeds, dormitory.getOccupiedBeds() + 1)
-                          .set(Dormitory::getUpdateTime, LocalDateTime.now());
-            dormitoryMapper.update(null, dormitoryUpdate);
-        }
-
-        return result;
+        return false;
     }
 
     @Override
@@ -296,49 +296,49 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 //            }
         }
 
-        // 检查新床位是否已被占用
-        LambdaQueryWrapper<Student> bedQuery = new LambdaQueryWrapper<>();
-        bedQuery.eq(Student::getDormitoryId, newDormitoryId)
-               .eq(Student::getBedNo, newBedNo)
-               .eq(Student::getDeleted, 0)
-               .ne(Student::getId, studentId);
-        Student bedStudent = this.getOne(bedQuery);
-        if (bedStudent != null) {
-            throw new RuntimeException("新床位已被其他学生占用");
-        }
+//        // 检查新床位是否已被占用
+//        LambdaQueryWrapper<Student> bedQuery = new LambdaQueryWrapper<>();
+//        bedQuery.eq(Student::getDormitoryId, newDormitoryId)
+//               .eq(Student::getBedNo, newBedNo)
+//               .eq(Student::getDeleted, 0)
+//               .ne(Student::getId, studentId);
+//        Student bedStudent = this.getOne(bedQuery);
+//        if (bedStudent != null) {
+//            throw new RuntimeException("新床位已被其他学生占用");
+//        }
+//
+//        String oldDormitoryId = student.getDormitoryId();
+//
+//        // 调换宿舍
+//        LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
+//        updateWrapper.eq(Student::getId, studentId)
+//                    .set(Student::getDormitoryId, newDormitoryId)
+//                    .set(Student::getBedNo, newBedNo)
+//                    .set(Student::getUpdateTime, LocalDateTime.now())
+//                    .set(Student::getUpdateBy, updateBy);
+//
+//        boolean result = this.update(updateWrapper);
+//
+//        if (result) {
+//            // 更新旧宿舍入住人数
+//            if (!oldDormitoryId.equals(newDormitoryId)) {
+//                Dormitory oldDormitory = dormitoryMapper.selectById(oldDormitoryId);
+//                LambdaUpdateWrapper<Dormitory> oldUpdate = new LambdaUpdateWrapper<>();
+//                oldUpdate.eq(Dormitory::getId, oldDormitoryId)
+//                        .set(Dormitory::getOccupiedBeds, Math.max(0, oldDormitory.getOccupiedBeds() - 1))
+//                        .set(Dormitory::getUpdateTime, LocalDateTime.now());
+//                dormitoryMapper.update(null, oldUpdate);
+//
+//                // 更新新宿舍入住人数
+//                LambdaUpdateWrapper<Dormitory> newUpdate = new LambdaUpdateWrapper<>();
+//                newUpdate.eq(Dormitory::getId, newDormitoryId)
+//                        .set(Dormitory::getOccupiedBeds, newDormitory.getOccupiedBeds() + 1)
+//                        .set(Dormitory::getUpdateTime, LocalDateTime.now());
+//                dormitoryMapper.update(null, newUpdate);
+//            }
+//        }
 
-        String oldDormitoryId = student.getDormitoryId();
-
-        // 调换宿舍
-        LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Student::getId, studentId)
-                    .set(Student::getDormitoryId, newDormitoryId)
-                    .set(Student::getBedNo, newBedNo)
-                    .set(Student::getUpdateTime, LocalDateTime.now())
-                    .set(Student::getUpdateBy, updateBy);
-
-        boolean result = this.update(updateWrapper);
-
-        if (result) {
-            // 更新旧宿舍入住人数
-            if (!oldDormitoryId.equals(newDormitoryId)) {
-                Dormitory oldDormitory = dormitoryMapper.selectById(oldDormitoryId);
-                LambdaUpdateWrapper<Dormitory> oldUpdate = new LambdaUpdateWrapper<>();
-                oldUpdate.eq(Dormitory::getId, oldDormitoryId)
-                        .set(Dormitory::getOccupiedBeds, Math.max(0, oldDormitory.getOccupiedBeds() - 1))
-                        .set(Dormitory::getUpdateTime, LocalDateTime.now());
-                dormitoryMapper.update(null, oldUpdate);
-
-                // 更新新宿舍入住人数
-                LambdaUpdateWrapper<Dormitory> newUpdate = new LambdaUpdateWrapper<>();
-                newUpdate.eq(Dormitory::getId, newDormitoryId)
-                        .set(Dormitory::getOccupiedBeds, newDormitory.getOccupiedBeds() + 1)
-                        .set(Dormitory::getUpdateTime, LocalDateTime.now());
-                dormitoryMapper.update(null, newUpdate);
-            }
-        }
-
-        return result;
+        return false;
     }
 
     @Override
@@ -361,7 +361,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Student::getId, studentId)
                     .set(Student::getDormitoryId, null)
-                    .set(Student::getBedNo, null)
+//                    .set(Student::getBedNo, null)
                     .set(Student::getUpdateTime, LocalDateTime.now())
                     .set(Student::getUpdateBy, updateBy);
 
@@ -384,8 +384,8 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     public List<StudentVO> getStudentsByDormitory(String dormitoryId) {
         LambdaQueryWrapper<Student> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Student::getDormitoryId, dormitoryId)
-                   .eq(Student::getDeleted, 0)
-                   .orderByAsc(Student::getBedNo);
+                   .eq(Student::getDeleted, 0);
+//                   .orderByAsc(Student::getBedNo);
 
         List<Student> students = this.list(queryWrapper);
         return students.stream()
@@ -514,11 +514,11 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         // 设置性别文本
         studentVO.setGenderText(student.getGender() == 1 ? "男" : "女");
 
-        // 计算年龄
-        if (student.getBirthDate() != null) {
-            int age = Period.between(student.getBirthDate(), LocalDate.now()).getYears();
-            studentVO.setAge(age);
-        }
+//        // 计算年龄
+//        if (student.getBirthDate() != null) {
+//            int age = Period.between(student.getBirthDate(), LocalDate.now()).getYears();
+//            studentVO.setAge(age);
+//        }
 
         // 设置状态文本
         studentVO.setStatusText(getStatusText(student.getStatus()));
