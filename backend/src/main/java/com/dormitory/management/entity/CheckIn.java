@@ -41,6 +41,14 @@ public class CheckIn implements Serializable {
 
 
 
+
+
+    /**
+     * 床位ID
+     */
+    @TableField("bed_no")
+    private String bedNo;
+
     /**
      * 床位ID
      */
@@ -139,4 +147,13 @@ public class CheckIn implements Serializable {
     @TableLogic
     @TableField("deleted")
     private Integer deleted;
+
+
+
+    @TableField("building_name")
+    private  String buildingName;
+
+    @TableField("room_no")
+    private  String roomNo;
+
 }

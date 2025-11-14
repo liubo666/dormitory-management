@@ -3,7 +3,9 @@ package com.dormitory.management.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 入住分配视图对象
@@ -84,20 +86,20 @@ public class CheckInVO {
     /**
      * 入住日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime checkInDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate checkInDate;
 
     /**
      * 预计退宿日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime expectedCheckoutDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate expectedCheckoutDate;
 
     /**
      * 实际退宿日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime actualCheckoutDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate actualCheckoutDate;
 
     /**
      * 入住状态(0:申请中,1:已入住,2:已退宿,3:已拒绝)

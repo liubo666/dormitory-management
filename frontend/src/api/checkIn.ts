@@ -25,6 +25,8 @@ export interface CheckInForm {
   dormitoryId?: string
   bedId?: string
   bedNo?: string
+  buildingName?: string
+  roomNo?: string
   checkInDate: string
   expectedCheckoutDate?: string
   status?: number

@@ -628,10 +628,6 @@ const availableBedOptions = ref<Array<{
   children?: Array<{
     value: string
     label: string
-    children?: Array<{
-      value: string
-      label: string
-    }>
   }>
 }>>([])
 
@@ -654,6 +650,8 @@ const applicationForm = reactive<CheckInForm>({
   dormitoryId: '',
   bedId: '',
   bedNo: '',
+  buildingName: '',
+  roomNo: '',
   checkInDate: '',
   applicationReason: ''
 })
@@ -677,12 +675,6 @@ const checkoutForm = reactive({
 })
 
 // 选项数据
-const buildingOptions = ref([
-  { label: 'A1栋', value: '1' },
-  { label: 'A2栋', value: '2' },
-  { label: 'B1栋', value: '3' }
-])
-
 const dormitoryOptions = ref<{label: string, value: string}[]>([])
 const bedOptions = ref<{label: string, value: string}[]>([])
 const studentOptions = ref<{label: string, value: string}[]>([])
@@ -792,23 +784,31 @@ const loadAvailableBeds = async () => {
 
 // 床位选择处理
 const handleBedSelection = (value: string[]) => {
-  console.log(value);
   if (value && value.length === 2) {
     applicationForm.dormitoryId = value[0]  // 宿舍ID
     applicationForm.bedId = value[1]       // 床位ID（来自后端的bedId字段）
 
-    // 找到对应的床位号
+    // 找到对应的宿舍和床位信息
     const dormitory = availableBedOptions.value.find(d => d.value === value[0])
     if (dormitory && dormitory.children) {
       const bed = dormitory.children.find(bed => bed.value === value[1])
       if (bed) {
-        applicationForm.bedNo = bed.label   // 床位号（显示文本）
+        applicationForm.bedNo = bed.label        // 床位号（显示文本）
+        // 从宿舍标签中解析出楼栋名称和房间号
+        const dormLabel = dormitory.label // 格式: "楼栋名 - 房间号"
+        const parts = dormLabel.split(' - ')
+        if (parts.length >= 2) {
+          applicationForm.buildingName = parts[0]  // 楼栋名称
+          applicationForm.roomNo = parts[1]        // 房间号
+        }
       }
     }
   } else {
     applicationForm.bedId = ''
     applicationForm.dormitoryId = ''
     applicationForm.bedNo = ''
+    applicationForm.buildingName = ''
+    applicationForm.roomNo = ''
   }
 }
 
@@ -869,15 +869,29 @@ const handleSubmitApplication = async () => {
           dormitoryId: '',
           bedId: '',
           bedNo: '',
+          buildingName: '',
+          roomNo: '',
           checkInDate: '',
           applicationReason: ''
         })
         selectedBedPath.value = []
         loadData()
         loadStatistics()
-      } catch (error) {
-        ElMessage.error('申请提交失败')
+      } catch (error: any) {
         console.error(error)
+        // 提取具体的错误信息
+        let errorMessage = '申请提交失败'
+        if (error && error.response && error.response.data) {
+          const data = error.response.data
+          if (data.message) {
+            errorMessage = data.message
+          } else if (data.msg) {
+            errorMessage = data.msg
+          }
+        } else if (error && error.message) {
+          errorMessage = error.message
+        }
+        ElMessage.error(errorMessage)
       } finally {
         submitting.value = false
       }

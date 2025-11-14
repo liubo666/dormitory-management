@@ -55,10 +55,6 @@ public class CheckInDTO {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDate checkInDate;
 
-    /**
-     * 预计退宿日期
-     */
-    private LocalDateTime expectedCheckoutDate;
 
 
     /**
@@ -66,23 +62,33 @@ public class CheckInDTO {
      */
     private String applicationReason;
 
-    /**
-     * 审批人
-     */
-    private String approver;
 
-    /**
-     * 审批备注
-     */
-    private String approvalRemark;
 
-    /**
-     * 退宿原因
-     */
-    private String checkoutReason;
+    private  String buildingName;
 
-    /**
-     * 备注
-     */
-    private String remark;
+
+    private  String roomNo;
+
+
+
+
+//    /**
+//     * 审批人
+//     */
+//    private String approver;
+//
+//    /**
+//     * 审批备注
+//     */
+//    private String approvalRemark;
+//
+//    /**
+//     * 退宿原因
+//     */
+//    private String checkoutReason;
+//
+//    /**
+//     * 备注
+//     */
+//    private String remark;
 }
