@@ -1,0 +1,99 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: dormitory-management
+  profiles:
+    active: dev  # 默认启用开发环境
+
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      update-strategy: NOT_NULL
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+
+# JWT配置
+jwt:
+  secret: mySecretKey123456789012345678901234567890  # 至少32位
+  expiration: 86400      # 访问令牌过期时间（秒）= 24小时
+  refresh-expiration: 604800  # 刷新令牌过期时间（秒）= 7天
+
+# Knife4j配置
+knife4j:
+  enable: true
+  openapi:
+    title: 宿舍管理系统API
+    description: 宿舍管理系统接口文档（开发环境）  # 明确环境标识
+    version: 1.0.0
+    concat-contact: true
+    contact:
+      name: 管理员
+      email: admin@dormitory.com
+    license: Apache 2.0
+    license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+  setting:
+    language: zh_cn
+    enable-version: true
+    enable-reload-cache-parameter: true  # 开发时允许刷新参数
+    enable-after-script: false  # 若不用后置脚本，关闭减少冗余
+    enable-filter-multipart-api-method-type: POST
+    enable-filter-multipart-apis: false
+    enable-request-cache: true  # 开发调试时缓存参数
+    enable-host: false
+    enable-home-custom: false
+    enable-search: true
+    enable-footer: false
+    enable-footer-custom: false
+    enable-dynamic-parameter: false  # 接口参数固定，关闭
+    enable-debug: true  # 开发时允许在线调试
+    enable-openapi: true
+    enable-group: true
+  cors: false  # 前端若已配置跨域，无需重复开启
+  production: false  # 明确非生产环境
+  basic:
+    enable: false  # 开发环境无需认证
+
+# 日志配置
+logging:
+  level:
+    com.dormitory.management: debug
+    root: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

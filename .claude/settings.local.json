@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm create:*)",
+      "Bash(npm run dev)",
+      "Bash(curl:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(netstat:*)",
+      "Bash(java:*)",
+      "Bash(./mvnw:*)",
+      "Bash(find:*)",
+      "Bash(npm install:*)",
+      "Bash(mvn spring-boot:run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
