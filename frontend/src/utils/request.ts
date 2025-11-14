@@ -1,5 +1,6 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
 import type { AxiosInstance as AxiosInstanceType } from 'axios'
+import { ElMessage } from 'element-plus'
 
 // 接口响应数据格式
 export interface ApiResponse<T = any> {
@@ -71,20 +72,25 @@ service.interceptors.response.use(
           // 未授权，清除token并跳转到登录页
           localStorage.removeItem('token')
           localStorage.removeItem('userInfo')
+          localStorage.removeItem('refreshToken')
+          ElMessage.error('登录已过期，请重新登录')
           window.location.href = '/login'
           break
         case 403:
           errorMessage = errorMessage || '权限不足'
-          return Promise.reject(new Error(errorMessage))
+          break
         case 404:
           errorMessage = errorMessage || '请求的资源不存在'
-          return Promise.reject(new Error(errorMessage))
+          break
         case 500:
           errorMessage = errorMessage || '服务器内部错误'
-          return Promise.reject(new Error(errorMessage))
+          break
         default:
-          return Promise.reject(new Error(errorMessage || `请求失败，状态码：${status}`))
+          errorMessage = errorMessage || `请求失败，状态码：${status}`
+          break
       }
+
+      return Promise.reject(new Error(errorMessage))
     } else if (error.code === 'ECONNABORTED') {
       return Promise.reject(new Error('请求超时，请检查网络连接'))
     } else {
