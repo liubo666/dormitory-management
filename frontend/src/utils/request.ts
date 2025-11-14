@@ -1,4 +1,9 @@
-import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
+import axios, {
+    type InternalAxiosRequestConfig,
+    type AxiosResponse,
+    type AxiosError,
+    type AxiosRequestConfig
+} from 'axios'
 import type { AxiosInstance as AxiosInstanceType } from 'axios'
 import { ElMessage } from 'element-plus'
 
@@ -20,13 +25,13 @@ const service: AxiosInstanceType = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     // 添加JWT token到请求头
     const token = localStorage.getItem('token')
     if (token) {
       config.headers = config.headers || {}
       // 使用标准的Authorization Bearer token
-      config.headers['Authorization'] = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -58,13 +63,11 @@ service.interceptors.response.use(
       let errorMessage = '请求失败'
 
       if (data) {
-        if (typeof data === 'string') {
-          errorMessage = data
-        } else if (data.message) {
-          errorMessage = data.message
-        } else if (data.error) {
-          errorMessage = data.error
-        }
+          if (typeof data === 'object') {
+              if (data.message) {
+                  errorMessage = data.message
+              }
+          }
       }
 
       switch (status) {
