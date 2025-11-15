@@ -63,12 +63,6 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Fee',
         component: () => import('@/views/fee/index.vue'),
         meta: { title: '费用管理', icon: 'card-outline' }
-      },
-      {
-        path: 'statistics',
-        name: 'Statistics',
-        component: () => import('@/views/statistics/index.vue'),
-        meta: { title: '数据统计', icon: 'bar-chart-outline' }
       }
     ]
   }

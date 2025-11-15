@@ -73,10 +73,6 @@
             <el-icon><CreditCard /></el-icon>
             <template #title>费用管理</template>
           </el-menu-item>
-          <el-menu-item index="statistics">
-            <el-icon><DataLine /></el-icon>
-            <template #title>数据统计</template>
-          </el-menu-item>
         </el-menu>
         <div class="collapse-trigger" @click="collapsed = !collapsed">
           <el-icon>
@@ -112,7 +108,6 @@ import {
   Document,
   UserFilled,
   CreditCard,
-  DataLine,
   Expand,
   Fold
 } from '@element-plus/icons-vue'

@@ -2,64 +2,146 @@
   <div class="dashboard">
     <div class="dashboard-header">
       <h1>欢迎使用宿舍管理系统</h1>
+      <p v-if="statistics && statistics.statisticsTime">
+        数据更新时间：{{ formatDateTime(statistics.statisticsTime) }}
+      </p>
     </div>
 
-    <div class="stats-grid">
-      <el-card class="stat-card">
+    <div class="stats-grid" v-loading="loading">
+      <!-- 主要统计卡片 -->
+      <el-card class="stat-card primary-card">
         <div class="stat-content">
-          <div class="stat-icon">
-            <el-icon size="32" color="#1e40af">
+          <div class="stat-icon primary-icon">
+            <el-icon size="40">
               <School />
             </el-icon>
           </div>
           <div class="stat-info">
-            <div class="stat-number">12</div>
-            <div class="stat-label">宿舍楼栋</div>
+            <div class="stat-number primary-number">{{ statistics?.studentStatistics?.totalStudents || 0 }}</div>
+            <div class="stat-label">学生总数</div>
+            <div class="stat-description">系统注册学生</div>
           </div>
         </div>
       </el-card>
 
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <div class="stat-icon">
-            <el-icon size="32" color="#059669">
-              <User />
-            </el-icon>
+      <!-- 次要统计卡片组 -->
+      <div class="secondary-stats">
+        <el-card class="stat-card secondary-card">
+          <div class="stat-content">
+            <div class="stat-icon success-icon">
+              <el-icon size="28">
+                <User />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-number">{{ statistics?.studentStatistics?.checkedInStudents || 0 }}</div>
+              <div class="stat-label">入住学生</div>
+            </div>
           </div>
-          <div class="stat-info">
-            <div class="stat-number">2456</div>
-            <div class="stat-label">入住学生</div>
-          </div>
-        </div>
-      </el-card>
+        </el-card>
 
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <div class="stat-icon">
-            <el-icon size="32" color="#d97706">
-              <House />
-            </el-icon>
+        <el-card class="stat-card secondary-card">
+          <div class="stat-content">
+            <div class="stat-icon warning-icon">
+              <el-icon size="28">
+                <House />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-number">{{ statistics?.dormitoryStatistics?.totalRooms || 0 }}</div>
+              <div class="stat-label">宿舍房间</div>
+            </div>
           </div>
-          <div class="stat-info">
-            <div class="stat-number">480</div>
-            <div class="stat-label">宿舍房间</div>
-          </div>
-        </div>
-      </el-card>
+        </el-card>
 
-      <el-card class="stat-card">
-        <div class="stat-content">
-          <div class="stat-icon">
-            <el-icon size="32" color="#0891b2">
-              <DataLine />
-            </el-icon>
+        <el-card class="stat-card secondary-card">
+          <div class="stat-content">
+            <div class="stat-icon info-icon">
+              <el-icon size="28">
+                <DataLine />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-number">{{ (statistics?.dormitoryStatistics?.occupancyRate || 0).toFixed(1) }}%</div>
+              <div class="stat-label">入住率</div>
+            </div>
           </div>
-          <div class="stat-info">
-            <div class="stat-number">78.5%</div>
-            <div class="stat-label">入住率</div>
-          </div>
-        </div>
-      </el-card>
+        </el-card>
+      </div>
+    </div>
+
+    <!-- 额外统计信息区域 -->
+    <div class="extended-stats" v-loading="loading" v-if="statistics">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-card class="extended-card">
+            <div class="card-header">
+              <h3>费用统计</h3>
+              <el-icon size="20" color="#10b981"><Money /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="stat-item">
+                <span class="label">总费用：</span>
+                <span class="value">¥{{ (statistics?.feeStatistics?.totalAmount || 0).toFixed(2) }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">已收费：</span>
+                <span class="value">¥{{ (statistics?.feeStatistics?.paidAmount || 0).toFixed(2) }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">收费率：</span>
+                <span class="value">{{ (statistics?.feeStatistics?.collectionRate || 0).toFixed(1) }}%</span>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :span="8">
+          <el-card class="extended-card">
+            <div class="card-header">
+              <h3>访客统计</h3>
+              <el-icon size="20" color="#8b5cf6"><UserFilled /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="stat-item">
+                <span class="label">今日访客：</span>
+                <span class="value">{{ statistics?.visitorStatistics?.todayVisitors || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">本周访客：</span>
+                <span class="value">{{ statistics?.visitorStatistics?.weeklyVisitors || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">本月访客：</span>
+                <span class="value">{{ statistics?.visitorStatistics?.monthlyVisitors || 0 }}</span>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :span="8">
+          <el-card class="extended-card">
+            <div class="card-header">
+              <h3>学生状态</h3>
+              <el-icon size="20" color="#f59e0b"><Avatar /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="stat-item">
+                <span class="label">申请中：</span>
+                <span class="value">{{ statistics?.studentStatistics?.applyingStudents || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">已退宿：</span>
+                <span class="value">{{ statistics?.studentStatistics?.checkedOutStudents || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">入住率：</span>
+                <span class="value">{{ (statistics?.studentStatistics?.checkInRate || 0).toFixed(1) }}%</span>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
     </div>
 
     <div class="action-area">
@@ -72,79 +154,186 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import {
   School,
   User,
   House,
   DataLine,
-  Right
+  Right,
+  Money,
+  UserFilled,
+  Avatar
 } from '@element-plus/icons-vue'
+import { getOverallStatistics } from '@/api/statistics'
+import type { OverallStatistics } from '@/api/statistics'
+
+const loading = ref(false)
+const statistics = ref<OverallStatistics | null>(null)
+
+// 格式化日期时间
+const formatDateTime = (dateTime: string) => {
+  if (!dateTime) return ''
+  return new Date(dateTime).toLocaleString('zh-CN')
+}
+
+// 获取统计数据
+const fetchStatistics = async () => {
+  try {
+    loading.value = true
+    const response = await getOverallStatistics()
+    statistics.value = response // response已经是data，不需要再取.data
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchStatistics()
+})
 </script>
 
 <style scoped>
 .dashboard {
-  padding: 24px;
+  padding: 16px;
 }
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .dashboard-header h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   color: #1e40af;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .dashboard-header p {
-  font-size: 16px;
+  font-size: 14px;
   color: #64748b;
+  margin-top: 8px;
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease;
+/* 主要统计卡片 */
+.primary-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.stat-content {
+.primary-card .stat-content {
   display: flex;
   align-items: center;
   padding: 20px;
   gap: 16px;
 }
 
-.stat-icon {
+.primary-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
 }
 
-.stat-info {
-  flex: 1;
+.primary-number {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.primary-card .stat-label {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.stat-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+/* 次要统计卡片组 */
+.secondary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.secondary-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid #f1f5f9;
+}
+
+.secondary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: #e2e8f0;
+}
+
+.secondary-card .stat-content {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 10px;
+}
+
+.success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
 }
 
 .stat-number {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 4px;
@@ -156,10 +345,81 @@ import {
   font-weight: 500;
 }
 
+.extended-stats {
+  margin-bottom: 20px;
+}
+
+.extended-card {
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease;
+}
+
+.extended-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.card-content {
+  padding: 0 20px 20px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.stat-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.stat-item .label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-item .value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .action-area {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  align-items: center;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.action-area .el-button {
+  min-width: 180px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {
@@ -167,7 +427,51 @@ import {
     padding: 16px;
   }
 
-  .stats-grid {
+  .primary-card .stat-content {
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .primary-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .primary-number {
+    font-size: 36px;
+  }
+
+  .primary-card .stat-label {
+    font-size: 16px;
+  }
+
+  .secondary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .extended-stats .el-col {
+    margin-bottom: 16px;
+  }
+
+  .action-area {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-area .el-button {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .extended-stats .el-col {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .secondary-stats {
     grid-template-columns: 1fr;
   }
 }
