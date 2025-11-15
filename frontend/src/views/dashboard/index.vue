@@ -72,7 +72,7 @@
 
     <!-- 额外统计信息区域 -->
     <div class="extended-stats" v-loading="loading" v-if="statistics">
-      <el-row :gutter="20">
+      <el-row :gutter="16">
         <el-col :span="8">
           <el-card class="extended-card">
             <div class="card-header">
@@ -235,27 +235,27 @@ onMounted(() => {
 .primary-card .stat-content {
   display: flex;
   align-items: center;
-  padding: 20px;
-  gap: 16px;
+  padding: 16px;
+  gap: 12px;
 }
 
 .primary-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   color: white;
 }
 
 .primary-number {
-  font-size: 36px;
+  font-size: 30px;
   font-weight: 800;
   color: white;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .primary-card .stat-label {
@@ -295,17 +295,17 @@ onMounted(() => {
 .secondary-card .stat-content {
   display: flex;
   align-items: center;
-  padding: 12px;
-  gap: 10px;
+  padding: 10px;
+  gap: 8px;
 }
 
 .success-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
@@ -314,9 +314,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
 }
@@ -325,18 +325,18 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
 .stat-number {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stat-label {
@@ -346,7 +346,7 @@ onMounted(() => {
 }
 
 .extended-stats {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .extended-card {
@@ -365,9 +365,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 20px 0;
+  padding: 16px 16px 0;
   border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .card-header h3 {
@@ -378,15 +378,15 @@ onMounted(() => {
 }
 
 .card-content {
-  padding: 0 20px 20px;
+  padding: 0 16px 16px;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding: 8px 0;
+  margin-bottom: 8px;
+  padding: 6px 0;
   border-bottom: 1px solid #f8fafc;
 }
 
