@@ -47,13 +47,6 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             queryWrapper.eq(CheckIn::getStudentId, pageDTO.getStudentId());
         }
 
-//        if (StringUtils.hasText(pageDTO.getDormitoryId())) {
-//            queryWrapper.eq(CheckIn::getDormitoryId, pageDTO.getDormitoryId());
-//        }
-//
-//        if (StringUtils.hasText(pageDTO.getBedNo())) {
-//            queryWrapper.like(CheckIn::getBedNo, pageDTO.getBedNo());
-//        }
 
         if (pageDTO.getStatus() != null) {
             queryWrapper.eq(CheckIn::getStatus, pageDTO.getStatus());
@@ -123,10 +116,19 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         checkIn.setUpdateBy(createBy);
         checkIn.setDeleted(0);
 
+        checkIn.setStudentNo(student.getStudentNo());
+        checkIn.setName(student.getName());
+        checkIn.setGender(student.getGender());
+        checkIn.setCollege(student.getCollege());
+        checkIn.setMajor(student.getMajor());
 
         studentMapper.update(Wrappers.<Student>lambdaUpdate()
-                .eq(Student::getId,checkInDTO.getDormitoryId())
+                .eq(Student::getId,checkInDTO.getStudentId())
                 .set(Student::getCheckInStatus,1));
+
+        bedMapper.update(Wrappers.<Bed>lambdaUpdate().
+                 eq(Bed::getId, checkInDTO.getBedId())
+                .set(Bed::getStatus, 3));
 
         return this.save(checkIn);
     }
@@ -411,18 +413,19 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         // 设置状态文本
         CheckInStatusEnum statusEnum = CheckInStatusEnum.getByCode(checkIn.getStatus());
         vo.setStatusText(statusEnum != null ? statusEnum.getDescription() : "未知");
+        vo.setStudentGenderText(checkIn.getGender() == 1 ? "男" : "女");
 
-        // 获取学生信息
-        Student student = studentMapper.selectById(checkIn.getStudentId());
-        if (student != null) {
-            vo.setStudentNo(student.getStudentNo());
-            vo.setStudentName(student.getName());
-            vo.setStudentGender(student.getGender());
-            vo.setStudentGenderText(student.getGender() == 1 ? "男" : "女");
-            vo.setCollege(student.getCollege());
-            vo.setMajor(student.getMajor());
-            vo.setClassName(student.getClassName());
-        }
+//        // 获取学生信息
+//        Student student = studentMapper.selectById(checkIn.getStudentId());
+//        if (student != null) {
+//            vo.setStudentNo(student.getStudentNo());
+//            vo.setStudentName(student.getName());
+//            vo.setStudentGender(student.getGender());
+//            vo.setStudentGenderText(student.getGender() == 1 ? "男" : "女");
+//            vo.setCollege(student.getCollege());
+//            vo.setMajor(student.getMajor());
+//            vo.setClassName(student.getClassName());
+//        }
 
 //        // 获取宿舍信息
 //        if (StringUtils.hasText(checkIn.getDormitoryId())) {

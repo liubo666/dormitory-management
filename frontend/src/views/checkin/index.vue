@@ -23,8 +23,8 @@
 
     <!-- 统计卡片 -->
     <div class="stats-container">
-      <el-row :gutter="20">
-        <el-col :span="6">
+      <el-row :gutter="24">
+        <el-col :span="8">
           <el-card class="stats-card">
             <div class="stats-content">
               <div class="stats-icon applying">
@@ -37,7 +37,7 @@
             </div>
           </el-card>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-card class="stats-card">
             <div class="stats-content">
               <div class="stats-icon checked-in">
@@ -50,20 +50,7 @@
             </div>
           </el-card>
         </el-col>
-<!--        <el-col :span="6">-->
-<!--          <el-card class="stats-card">-->
-<!--            <div class="stats-content">-->
-<!--              <div class="stats-icon checked-out">-->
-<!--                <el-icon><CircleClose /></el-icon>-->
-<!--              </div>-->
-<!--              <div class="stats-info">-->
-<!--                <div class="stats-number">{{ statistics.checkedOutCount }}</div>-->
-<!--                <div class="stats-label">已退宿</div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </el-card>-->
-<!--        </el-col>-->
-        <el-col :span="6">
+        <el-col :span="8">
           <el-card class="stats-card">
             <div class="stats-content">
               <div class="stats-icon rejected">
@@ -183,7 +170,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="studentName" label="学生姓名" width="100" />
+          <el-table-column prop="name" label="学生姓名" width="100" />
           <el-table-column prop="studentNo" label="学号" width="130" />
           <el-table-column prop="studentGenderText" label="性别" width="80" />
           <el-table-column prop="college" label="学院" width="120" />
@@ -1169,30 +1156,38 @@ onMounted(() => {
 }
 
 .stats-container {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .stats-card {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .stats-content {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  padding: 20px;
 }
 
 .stats-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
-  font-size: 24px;
+  margin-right: 20px;
+  font-size: 32px;
   color: white;
+  flex-shrink: 0;
 }
 
 .stats-icon.applying {
@@ -1216,15 +1211,15 @@ onMounted(() => {
 }
 
 .stats-number {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
   color: #1e293b;
-  line-height: 1;
-  margin-bottom: 4px;
+  line-height: 1.2;
+  margin-bottom: 8px;
 }
 
 .stats-label {
-  font-size: 14px;
+  font-size: 16px;
   color: #64748b;
   font-weight: 500;
 }

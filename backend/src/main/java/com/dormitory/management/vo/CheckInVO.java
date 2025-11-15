@@ -29,15 +29,7 @@ public class CheckInVO {
      */
     private String studentNo;
 
-    /**
-     * 学生姓名
-     */
-    private String studentName;
 
-    /**
-     * 学生性别
-     */
-    private Integer studentGender;
 
     /**
      * 学生性别文本
@@ -164,4 +156,28 @@ public class CheckInVO {
      * 更新人
      */
     private String updateBy;
+
+
+
+    /**
+     * 学生姓名
+     */
+    private String name;
+
+    /**
+     * 学生性别
+     */
+    private Integer gender;
+
+
+    /**
+     * 学生姓名
+     */
+    private String studentName;
+
+    /**
+     * 学生性别
+     */
+    private Integer studentGender;
+
 }

@@ -156,4 +156,30 @@ public class CheckIn implements Serializable {
     @TableField("room_no")
     private  String roomNo;
 
+
+    /**
+     * 学生学号
+     */
+    private String studentNo;
+
+    /**
+     * 学生姓名
+     */
+    private String name;
+
+    /**
+     * 学生性别
+     */
+    private Integer gender;
+
+    /**
+     * 学院
+     */
+    private String college;
+
+    /**
+     * 专业
+     */
+    private String major;
+
 }
