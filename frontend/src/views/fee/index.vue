@@ -947,7 +947,7 @@ onMounted(() => {
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 12px;
   color: white;
@@ -961,14 +961,14 @@ onMounted(() => {
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  margin-right: 16px;
-  font-size: 24px;
+  border-radius: 10px;
+  margin-right: 12px;
+  font-size: 20px;
 }
 
 .stat-icon.total {
@@ -992,14 +992,14 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   opacity: 0.9;
   font-weight: 500;
 }

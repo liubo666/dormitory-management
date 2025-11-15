@@ -12,7 +12,7 @@
       <el-card class="stat-card primary-card">
         <div class="stat-content">
           <div class="stat-icon primary-icon">
-            <el-icon size="40">
+            <el-icon size="32">
               <School />
             </el-icon>
           </div>
@@ -29,7 +29,7 @@
         <el-card class="stat-card secondary-card">
           <div class="stat-content">
             <div class="stat-icon success-icon">
-              <el-icon size="28">
+              <el-icon size="20">
                 <User />
               </el-icon>
             </div>
@@ -43,7 +43,7 @@
         <el-card class="stat-card secondary-card">
           <div class="stat-content">
             <div class="stat-icon warning-icon">
-              <el-icon size="28">
+              <el-icon size="20">
                 <House />
               </el-icon>
             </div>
@@ -57,7 +57,7 @@
         <el-card class="stat-card secondary-card">
           <div class="stat-content">
             <div class="stat-icon info-icon">
-              <el-icon size="28">
+              <el-icon size="20">
                 <DataLine />
               </el-icon>
             </div>
@@ -77,7 +77,7 @@
           <el-card class="extended-card">
             <div class="card-header">
               <h3>费用统计</h3>
-              <el-icon size="20" color="#10b981"><Money /></el-icon>
+              <el-icon size="16" color="#10b981"><Money /></el-icon>
             </div>
             <div class="card-content">
               <div class="stat-item">
@@ -100,7 +100,7 @@
           <el-card class="extended-card">
             <div class="card-header">
               <h3>访客统计</h3>
-              <el-icon size="20" color="#8b5cf6"><UserFilled /></el-icon>
+              <el-icon size="16" color="#8b5cf6"><UserFilled /></el-icon>
             </div>
             <div class="card-content">
               <div class="stat-item">
@@ -123,7 +123,7 @@
           <el-card class="extended-card">
             <div class="card-header">
               <h3>学生状态</h3>
-              <el-icon size="20" color="#f59e0b"><Avatar /></el-icon>
+              <el-icon size="16" color="#f59e0b"><Avatar /></el-icon>
             </div>
             <div class="card-content">
               <div class="stat-item">
@@ -197,32 +197,32 @@ onMounted(() => {
 
 <style scoped>
 .dashboard {
-  padding: 16px;
+  padding: 12px;
 }
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .dashboard-header h1 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #1e40af;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .dashboard-header p {
-  font-size: 14px;
+  font-size: 12px;
   color: #64748b;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .stats-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 /* 主要统计卡片 */
@@ -235,38 +235,38 @@ onMounted(() => {
 .primary-card .stat-content {
   display: flex;
   align-items: center;
-  padding: 16px;
-  gap: 12px;
+  padding: 12px;
+  gap: 10px;
 }
 
 .primary-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   color: white;
 }
 
 .primary-number {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
   color: white;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .primary-card .stat-label {
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .stat-description {
-  font-size: 14px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 400;
 }
@@ -274,8 +274,8 @@ onMounted(() => {
 /* 次要统计卡片组 */
 .secondary-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
 }
 
 .secondary-card {
@@ -295,17 +295,17 @@ onMounted(() => {
 .secondary-card .stat-content {
   display: flex;
   align-items: center;
-  padding: 10px;
-  gap: 8px;
+  padding: 8px;
+  gap: 6px;
 }
 
 .success-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
@@ -314,9 +314,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
 }
@@ -325,28 +325,28 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
 .stat-number {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #6b7280;
   font-weight: 500;
 }
 
 .extended-stats {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .extended-card {
@@ -365,28 +365,28 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 0;
+  padding: 12px 12px 0;
   border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1f2937;
 }
 
 .card-content {
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  padding: 6px 0;
+  margin-bottom: 6px;
+  padding: 4px 0;
   border-bottom: 1px solid #f8fafc;
 }
 
@@ -396,13 +396,13 @@ onMounted(() => {
 }
 
 .stat-item .label {
-  font-size: 14px;
+  font-size: 12px;
   color: #64748b;
   font-weight: 500;
 }
 
 .stat-item .value {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1f2937;
 }
@@ -411,14 +411,14 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-top: 16px;
+  gap: 16px;
+  margin-top: 12px;
 }
 
 .action-area .el-button {
-  min-width: 180px;
-  height: 44px;
-  font-size: 16px;
+  min-width: 160px;
+  height: 36px;
+  font-size: 14px;
   font-weight: 500;
 }
 
