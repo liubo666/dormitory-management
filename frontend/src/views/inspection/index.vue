@@ -9,7 +9,7 @@
         <p>管理宿舍卫生检查记录，包括检查评分、等级评定等</p>
       </div>
       <div class="page-actions">
-        <el-button type="primary" @click="handleAdd" size="large">
+        <el-button type="primary" @click="openAddDialog" size="large">
           <el-icon><Plus /></el-icon>
           新增检查
         </el-button>
@@ -17,97 +17,302 @@
     </div>
 
     <div class="content-container">
+      <!-- 搜索表单 -->
       <div class="search-section">
         <el-card shadow="never">
-          <el-form :model="searchForm" inline class="search-form">
-            <el-form-item label="宿舍号">
-              <el-input
-                v-model="searchForm.roomNo"
-                placeholder="请输入宿舍号"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="检查日期">
-              <el-date-picker
-                v-model="searchForm.inspectionDate"
-                type="date"
-                placeholder="请选择检查日期"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleSearch">
-                <el-icon><Search /></el-icon>
-                搜索
-              </el-button>
-              <el-button @click="handleReset">
-                <el-icon><RefreshRight /></el-icon>
-                重置
-              </el-button>
-            </el-form-item>
+          <el-form :model="searchForm" label-width="80px">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="宿舍号">
+                  <el-input
+                    v-model="searchForm.roomNo"
+                    placeholder="请输入宿舍号"
+                    clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="宿舍">
+                  <el-select
+                    v-model="searchForm.roomId"
+                    placeholder="请选择宿舍"
+                    clearable
+                    filterable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="room in dormitoryOptions"
+                      :key="room.value"
+                      :label="room.label"
+                      :value="room.value"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="检查等级">
+                  <el-select
+                    v-model="searchForm.level"
+                    placeholder="请选择等级"
+                    clearable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="item in levelOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="检查日期">
+                  <el-date-picker
+                    v-model="inspectionDateRange"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="16">
+                <el-form-item>
+                  <el-button type="primary" @click="handleSearch" :loading="loading">
+                    <el-icon><Search /></el-icon>
+                    搜索
+                  </el-button>
+                  <el-button @click="handleReset">
+                    <el-icon><RefreshRight /></el-icon>
+                    重置
+                  </el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-form>
         </el-card>
       </div>
 
+      <!-- 数据表格 -->
       <div class="table-section">
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          style="width: 100%"
-        >
-          <el-table-column prop="roomNo" label="宿舍号" width="100" />
-          <el-table-column prop="buildingName" label="楼栋" width="100" />
-          <el-table-column prop="inspectionDate" label="检查日期" width="120" />
-          <el-table-column prop="score" label="卫生分数" width="100" align="center" />
-          <el-table-column prop="level" label="等级" width="100" align="center">
-            <template #default="{ row }">
-              <el-tag :type="getLevelType(row.level)">
-                {{ row.level }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="inspectorName" label="检查人" width="120" />
-          <el-table-column prop="remarks" label="备注" min-width="200" show-overflow-tooltip />
-          <el-table-column label="操作" width="200" fixed="right">
-            <template #default="{ row }">
-              <el-button-group>
-                <el-button size="small" @click="handleView(row)">
-                  <el-icon><View /></el-icon>
-                </el-button>
-                <el-button size="small" type="primary" @click="handleEdit(row)">
-                  <el-icon><Edit /></el-icon>
-                </el-button>
-                <el-button size="small" type="danger" @click="handleDelete(row)">
-                  <el-icon><Delete /></el-icon>
-                </el-button>
-              </el-button-group>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-card shadow="never">
+          <el-table
+            :data="tableData"
+            v-loading="loading"
+            stripe
+            border
+            style="width: 100%"
+          >
+            <el-table-column prop="roomNo" label="宿舍号" width="100" />
+            <el-table-column prop="buildingName" label="楼栋" width="120" />
+            <el-table-column prop="inspectionDate" label="检查日期" width="120">
+              <template #default="{ row }">
+                {{ formatDate(row.inspectionDate) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="score" label="卫生分数" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="getScoreType(row.score)">
+                  {{ row.score }}分
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="levelText" label="等级" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="getLevelType(row.level)">
+                  {{ row.levelText }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="inspectorName" label="检查人" width="120" />
+            <el-table-column prop="remarks" label="备注" min-width="200" show-overflow-tooltip />
+            <el-table-column label="操作" width="200" fixed="right">
+              <template #default="{ row }">
+                <el-button-group>
+                  <el-button size="small" @click="handleView(row)">
+                    <el-icon><View /></el-icon>
+                    详情
+                  </el-button>
+                  <el-button size="small" type="primary" @click="handleEdit(row)">
+                    <el-icon><Edit /></el-icon>
+                    编辑
+                  </el-button>
+                  <el-button size="small" type="danger" @click="handleDelete(row)">
+                    <el-icon><Delete /></el-icon>
+                    删除
+                  </el-button>
+                </el-button-group>
+              </template>
+            </el-table-column>
+          </el-table>
 
-        <div class="pagination-section">
-          <el-pagination
-            v-model:current-page="pagination.page"
-            v-model:page-size="pagination.pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="pagination.itemCount"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handlePageChange"
-          />
-        </div>
+          <div class="pagination-container">
+            <el-pagination
+              v-model:current-page="pagination.current"
+              v-model:page-size="pagination.size"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="pagination.total"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </el-card>
       </div>
     </div>
+
+    <!-- 新增/编辑对话框 -->
+    <el-dialog
+      v-model="showDialog"
+      :title="isEdit ? '编辑检查记录' : '新增检查记录'"
+      width="800px"
+      :close-on-click-modal="false"
+    >
+      <el-form
+        :model="form"
+        :rules="rules"
+        ref="formRef"
+        label-width="100px"
+        label-position="right"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="宿舍" prop="roomId">
+              <el-select
+                v-model="form.roomId"
+                placeholder="请选择宿舍"
+                filterable
+                clearable
+                style="width: 100%"
+                @change="handleDormitoryChange"
+              >
+                <el-option
+                  v-for="room in dormitoryOptions"
+                  :key="room.value"
+                  :label="room.label"
+                  :value="room.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="检查日期" prop="inspectionDate">
+              <el-date-picker
+                v-model="form.inspectionDate"
+                type="datetime"
+                placeholder="请选择检查日期"
+                format="YYYY-MM-DD HH:mm:ss"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="卫生分数" prop="score">
+              <el-input-number
+                v-model="form.score"
+                :min="0"
+                :max="100"
+                placeholder="请输入卫生分数"
+                style="width: 100%"
+                @change="handleScoreChange"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="检查等级" prop="level">
+              <el-select
+                v-model="form.level"
+                placeholder="请选择等级"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in levelOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注">
+              <el-input
+                v-model="form.remarks"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入备注"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="问题描述">
+              <el-input
+                v-model="form.issues"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入详细问题描述"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showDialog = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmit" :loading="submitting">
+            {{ isEdit ? '更新' : '提交' }}
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 详情对话框 -->
+    <el-dialog
+      v-model="showDetailDialog"
+      title="检查记录详情"
+      width="600px"
+    >
+      <el-descriptions :column="2" border v-if="currentRecord">
+        <el-descriptions-item label="宿舍号">{{ currentRecord.roomNo }}</el-descriptions-item>
+        <el-descriptions-item label="楼栋">{{ currentRecord.buildingName }}</el-descriptions-item>
+        <el-descriptions-item label="检查日期">{{ formatDate(currentRecord.inspectionDate) }}</el-descriptions-item>
+        <el-descriptions-item label="卫生分数">{{ currentRecord.score }}分</el-descriptions-item>
+        <el-descriptions-item label="检查等级">
+          <el-tag :type="getLevelType(currentRecord.level)">
+            {{ currentRecord.levelText }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="检查人">{{ currentRecord.inspectorName }}</el-descriptions-item>
+        <el-descriptions-item label="备注" span="2">{{ currentRecord.remarks || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="问题描述" span="2">{{ currentRecord.issues || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="showDetailDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   Document,
   Plus,
@@ -117,127 +322,269 @@ import {
   Edit,
   Delete
 } from '@element-plus/icons-vue'
+import {
+  getInspectionPage,
+  getInspectionById,
+  addInspection,
+  updateInspection,
+  deleteInspection,
+  getDormitoryOptions,
+  getInspectionLevelOptions,
+  getLevelByScore,
+  getLevelType
+} from '@/api/inspection'
+import type { Inspection, InspectionForm, InspectionParams } from '@/api/inspection'
 
-interface Inspection {
-  id: number
-  roomNo: string
-  buildingName: string
-  inspectionDate: string
-  score: number
-  level: string
-  inspectorName: string
-  remarks: string
-}
-
+// 数据定义
 const loading = ref(false)
+const submitting = ref(false)
 const tableData = ref<Inspection[]>([])
+const showDialog = ref(false)
+const showDetailDialog = ref(false)
+const isEdit = ref(false)
+const currentRecord = ref<Inspection | null>(null)
 
-const searchForm = reactive({
+// 选项数据
+const dormitoryOptions = ref<{label: string, value: number}[]>([])
+const levelOptions = getInspectionLevelOptions()
+
+// 搜索表单
+const searchForm = reactive<InspectionParams>({
+  current: 1,
+  size: 10,
   roomNo: '',
-  inspectionDate: null as Date | null
+  roomId: undefined,
+  level: '',
+  startDate: '',
+  endDate: ''
 })
 
+// 日期范围
+const inspectionDateRange = ref<[string, string] | []>([])
+
+// 分页
 const pagination = reactive({
-  page: 1,
-  pageSize: 10,
-  itemCount: 0
+  current: 1,
+  size: 10,
+  total: 0
 })
 
-const getLevelType = (level: string) => {
-  switch (level) {
-    case '优秀': return 'success'
-    case '良好': return 'primary'
-    case '合格': return 'warning'
-    case '不合格': return 'danger'
-    default: return 'info'
-  }
+// 表单
+const form = reactive<InspectionForm>({
+  roomId: null as any,
+  inspectionDate: '',
+  score: null as any,
+  level: '',
+  remarks: '',
+  issues: '',
+  images: []
+})
+
+// 表单引用
+const formRef = ref<FormInstance>()
+
+// 表单验证规则
+const rules: FormRules = {
+  roomId: [{ required: true, message: '请选择宿舍', trigger: 'change' }],
+  inspectionDate: [{ required: true, message: '请选择检查日期', trigger: 'change' }],
+  score: [{ required: true, message: '请输入卫生分数', trigger: 'blur' }],
+  level: [{ required: true, message: '请选择检查等级', trigger: 'change' }]
 }
 
+// 工具方法
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  return dateStr.substring(0, 19).replace('T', ' ')
+}
+
+const getScoreType = (score: number) => {
+  if (score >= 90) return 'success'
+  if (score >= 80) return 'primary'
+  if (score >= 60) return 'warning'
+  return 'danger'
+}
+
+// 加载数据
 const loadData = async () => {
   loading.value = true
   try {
-    setTimeout(() => {
-      tableData.value = [
-        {
-          id: 1,
-          roomNo: '101',
-          buildingName: 'A1栋',
-          inspectionDate: '2024-09-15',
-          score: 95,
-          level: '优秀',
-          inspectorName: '张老师',
-          remarks: '宿舍整洁，卫生状况良好'
-        },
-        {
-          id: 2,
-          roomNo: '102',
-          buildingName: 'A1栋',
-          inspectionDate: '2024-09-15',
-          score: 78,
-          level: '良好',
-          inspectorName: '张老师',
-          remarks: '地面有少量杂物，需要清理'
-        },
-        {
-          id: 3,
-          roomNo: '201',
-          buildingName: 'A1栋',
-          inspectionDate: '2024-09-14',
-          score: 62,
-          level: '合格',
-          inspectorName: '李老师',
-          remarks: '垃圾桶已满，需要及时清理'
-        }
-      ]
-      pagination.itemCount = 3
-      loading.value = false
-    }, 1000)
-  } catch (error) {
-    loading.value = false
+    const params = {
+      ...searchForm,
+      current: pagination.current,
+      size: pagination.size,
+      startDate: inspectionDateRange.value[0] || '',
+      endDate: inspectionDateRange.value[1] || ''
+    }
+
+    const response = await getInspectionPage(params)
+    tableData.value = response.records
+    pagination.total = response.total
+  } catch (error: any) {
     ElMessage.error('获取数据失败')
+    console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
+// 加载宿舍选项
+const loadDormitoryOptions = async () => {
+  try {
+    const response = await getDormitoryOptions()
+    dormitoryOptions.value = response.map((item: any) => ({
+      label: `${item.buildingName || ''} ${item.roomNo}`,
+      value: item.id
+    }))
+  } catch (error) {
+    console.error('获取宿舍选项失败:', error)
+  }
+}
+
+// 搜索
 const handleSearch = () => {
-  pagination.page = 1
+  pagination.current = 1
   loadData()
 }
 
+// 重置
 const handleReset = () => {
-  searchForm.roomNo = ''
-  searchForm.inspectionDate = null
-  handleSearch()
-}
-
-const handlePageChange = (page: number) => {
-  pagination.page = page
+  Object.assign(searchForm, {
+    current: 1,
+    size: 10,
+    roomNo: '',
+    roomId: undefined,
+    level: '',
+    minScore: undefined,
+    maxScore: undefined,
+    startDate: '',
+    endDate: ''
+  })
+  inspectionDateRange.value = []
+  pagination.current = 1
   loadData()
 }
 
+// 分页变化
 const handleSizeChange = (size: number) => {
-  pagination.pageSize = size
-  pagination.page = 1
+  pagination.size = size
+  pagination.current = 1
   loadData()
 }
 
-const handleAdd = () => {
-  ElMessage.info('新增检查功能待开发')
+const handleCurrentChange = (current: number) => {
+  pagination.current = current
+  loadData()
 }
 
-const handleView = (row: Inspection) => {
-  ElMessage.info(`查看检查详情: ${row.roomNo} - ${row.level}`)
+// 打开新增对话框
+const openAddDialog = () => {
+  isEdit.value = false
+  Object.assign(form, {
+    roomId: null as any,
+    inspectionDate: '',
+    score: null as any,
+    level: '',
+    remarks: '',
+    issues: '',
+    images: []
+  })
+  showDialog.value = true
 }
 
-const handleEdit = (row: Inspection) => {
-  ElMessage.info(`编辑检查记录: ${row.roomNo}`)
+// 编辑
+const handleEdit = async (row: Inspection) => {
+  isEdit.value = true
+  try {
+    const detail = await getInspectionById(row.id)
+    Object.assign(form, {
+      id: detail.id,
+      roomId: detail.roomId,
+      inspectionDate: detail.inspectionDate,
+      score: detail.score,
+      level: detail.level,
+      remarks: detail.remarks || '',
+      issues: detail.issues || '',
+      images: detail.imageList || []
+    })
+    showDialog.value = true
+  } catch (error: any) {
+    ElMessage.error('获取详情失败')
+  }
 }
 
-const handleDelete = (row: Inspection) => {
-  ElMessage.info(`删除检查记录: ${row.roomNo}`)
+// 查看详情
+const handleView = async (row: Inspection) => {
+  try {
+    const detail = await getInspectionById(row.id)
+    currentRecord.value = detail
+    showDetailDialog.value = true
+  } catch (error: any) {
+    ElMessage.error('获取详情失败')
+  }
 }
 
+// 删除
+const handleDelete = async (row: Inspection) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这条检查记录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    await deleteInspection(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 宿舍变化处理
+const handleDormitoryChange = () => {
+  // 可以在这里添加宿舍变化的逻辑
+}
+
+// 分数变化处理
+const handleScoreChange = (score: number) => {
+  if (score !== null && score !== undefined) {
+    form.level = getLevelByScore(score)
+  }
+}
+
+// 提交表单
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    await formRef.value.validate()
+
+    submitting.value = true
+    if (isEdit.value) {
+      await updateInspection(form)
+      ElMessage.success('更新成功')
+    } else {
+      await addInspection(form)
+      ElMessage.success('添加成功')
+    }
+
+    showDialog.value = false
+    loadData()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
+    }
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 初始化
 onMounted(() => {
   loadData()
+  loadDormitoryOptions()
 })
 </script>
 
@@ -245,6 +592,7 @@ onMounted(() => {
 .inspection-management {
   padding: 24px;
   min-height: calc(100vh - 84px);
+  background: #f5f7fa;
 }
 
 .page-header {
@@ -256,6 +604,11 @@ onMounted(() => {
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
 }
 
 .page-title h2 {
@@ -272,40 +625,54 @@ onMounted(() => {
   font-size: 28px;
 }
 
+.page-title h2 .header-btn {
+  margin-left: auto;
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
 .page-title p {
   margin: 0;
   color: #64748b;
   font-size: 14px;
 }
 
-.content-container {
-  background: white;
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-section .el-card {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+  border: none;
 }
 
-.search-section {
-  padding: 20px;
-  border-bottom: 1px solid #f1f5f9;
+.search-section .el-form {
+  padding: 8px 0;
 }
 
-.search-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+.search-section .el-row {
+  margin-bottom: 16px;
+}
+
+.search-section .el-row:last-child {
+  margin-bottom: 0;
 }
 
 .table-section {
+  background: white;
+  border-radius: 12px;
   padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
-.pagination-section {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #f1f5f9;
+.pagination-container {
+  padding: 20px 0;
+  text-align: right;
+}
+
+.dialog-footer {
+  text-align: right;
 }
 
 :deep(.el-table) {
@@ -325,37 +692,5 @@ onMounted(() => {
 
 :deep(.el-pagination) {
   --el-pagination-button-bg-color: #ffffff;
-}
-
-@media (max-width: 768px) {
-  .inspection-management {
-    padding: 16px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .page-actions {
-    width: 100%;
-  }
-
-  .page-actions .el-button {
-    width: 100%;
-  }
-
-  .search-form {
-    flex-direction: column;
-  }
-
-  .search-form .el-form-item {
-    width: 100%;
-  }
-
-  .search-form .el-input,
-  .search-form .el-date-picker {
-    width: 100%;
-  }
 }
 </style>

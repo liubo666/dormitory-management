@@ -8,6 +8,12 @@
         </h2>
         <p>管理宿舍与楼栋信息等</p>
       </div>
+      <div class="page-actions">
+        <el-button type="primary" @click="handleAdd" size="large">
+          <el-icon><Plus /></el-icon>
+          新增宿舍
+        </el-button>
+      </div>
     </div>
 
     <div class="content-container">
@@ -62,10 +68,6 @@
                 <el-button @click="handleReset">
                   <el-icon><RefreshRight /></el-icon>
                   重置
-                </el-button>
-                <el-button type="success" @click="handleAdd">
-                  <el-icon><Plus /></el-icon>
-                  新增宿舍
                 </el-button>
               </el-form-item>
             </el-form>
@@ -726,6 +728,11 @@ onMounted(() => {
   margin: 0;
   color: #64748b;
   font-size: 14px;
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
 }
 
 .content-container {
