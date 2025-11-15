@@ -76,7 +76,7 @@ public class CheckIn implements Serializable {
     private LocalDate actualCheckoutDate;
 
     /**
-     * 入住状态(0:申请中,1:已入住,2:已退宿,3:已拒绝)
+     * 入住状态(1:申请中,2:已入住,3:已退宿,4:已拒绝)
      */
     @TableField("status")
     private Integer status;

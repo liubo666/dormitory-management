@@ -1,5 +1,6 @@
 package com.dormitory.management.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -43,11 +44,11 @@ public class StudentVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-//
-//    /**
-//     * 年龄
-//     */
-//    private Integer age;
+
+    /**
+     * 年龄
+     */
+    private Integer age;
 
     /**
      * 身份证号
@@ -167,6 +168,9 @@ public class StudentVO {
      * 更新人
      */
     private String updateBy;
+
+    private Integer  checkInStatus;
+
 
 
 

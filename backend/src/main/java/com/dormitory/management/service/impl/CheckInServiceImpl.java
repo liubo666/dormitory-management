@@ -5,11 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.dormitory.management.context.UserContext;
 import com.dormitory.management.dto.*;
-import com.dormitory.management.entity.Bed;
-import com.dormitory.management.entity.CheckIn;
-import com.dormitory.management.entity.Dormitory;
-import com.dormitory.management.entity.Student;
+import com.dormitory.management.entity.*;
+import com.dormitory.management.enums.CheckInStatusEnum;
 import com.dormitory.management.mapper.BedMapper;
 import com.dormitory.management.mapper.CheckInMapper;
 import com.dormitory.management.mapper.DormitoryMapper;
@@ -24,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -97,7 +97,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         // 检查学生是否已入住
         LambdaQueryWrapper<CheckIn> existingQuery = new LambdaQueryWrapper<>();
         existingQuery.eq(CheckIn::getStudentId, checkInDTO.getStudentId())
-                   .eq(CheckIn::getStatus, 1)
+                   .eq(CheckIn::getStatus, CheckInStatusEnum.CHECKED_IN.getCode())
                    .eq(CheckIn::getDeleted, 0);
         CheckIn existing = this.getOne(existingQuery);
         if (existing != null) {
@@ -107,7 +107,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         // 检查是否有待审批的申请
         existingQuery.clear();
         existingQuery.eq(CheckIn::getStudentId, checkInDTO.getStudentId())
-                   .eq(CheckIn::getStatus, 0)
+                   .eq(CheckIn::getStatus, CheckInStatusEnum.APPLYING.getCode())
                    .eq(CheckIn::getDeleted, 0);
         existing = this.getOne(existingQuery);
         if (existing != null) {
@@ -116,56 +116,73 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
 
         CheckIn checkIn = new CheckIn();
         BeanUtils.copyProperties(checkInDTO, checkIn);
-        checkIn.setStatus(0); // 申请中
+        checkIn.setStatus(CheckInStatusEnum.APPLYING.getCode()); // 申请中
         checkIn.setCreateTime(LocalDateTime.now());
         checkIn.setUpdateTime(LocalDateTime.now());
         checkIn.setCreateBy(createBy);
         checkIn.setUpdateBy(createBy);
         checkIn.setDeleted(0);
 
+
+        studentMapper.update(Wrappers.<Student>lambdaUpdate()
+                .eq(Student::getId,checkInDTO.getDormitoryId())
+                .set(Student::getCheckInStatus,1));
+
         return this.save(checkIn);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean approveCheckIn(String id, Integer status, String approvalRemark, String approver) {
-        CheckIn checkIn = this.getById(id);
+    public boolean approveCheckIn(CheckInApprovalDTO  dto) {
+
+        CheckIn checkIn = this.getById(dto.getId());
         if (checkIn == null) {
             throw new RuntimeException("入住申请不存在");
         }
 
-        if (checkIn.getStatus() != 0) {
+        if (checkIn.getStatus() != CheckInStatusEnum.APPLYING.getCode()) {
             throw new RuntimeException("只能审批申请中的记录");
         }
-
-        checkIn.setStatus(status);
-        checkIn.setApprovalRemark(approvalRemark);
-        checkIn.setApprover(approver);
+        UserInfo currentUser = UserContext.getCurrentUser();
+        checkIn.setStatus(dto.getStatus());
+        checkIn.setApprovalRemark(dto.getApprovalRemark());
+        checkIn.setApprover(currentUser.getRealName());
         checkIn.setApprovalTime(LocalDateTime.now());
         checkIn.setUpdateTime(LocalDateTime.now());
-        checkIn.setUpdateBy(approver);
+        checkIn.setUpdateBy(currentUser.getRoleName());
 
         boolean result = this.updateById(checkIn);
 
-        // 如果审批通过，需要分配宿舍
-        if (result && status == 1) {
-            // 检查是否有宿舍和床位信息
-//            if (StringUtils.hasText(checkIn.getDormitoryId()) && StringUtils.hasText(checkIn.getBedId())) {
-//                // 更新床位状态为已占用
-////                bedService.updateBedStatus(checkIn.getBedId(), 1, approver);
-//
-//                // 更新学生宿舍信息
-//                Student student = new Student();
-//                student.setId(checkIn.getStudentId());
-//                student.setDormitoryId(checkIn.getDormitoryId());
-//                student.setBedNo(checkIn.getBedNo());
-//                student.setUpdateBy(approver);
-//                student.setUpdateTime(LocalDateTime.now());
-//                studentMapper.updateById(student);
-//            }
+        studentMapper.update(Wrappers.<Student>lambdaUpdate()
+                .eq(Student::getId, checkIn.getStudentId())
+                .set(Student::getCheckInStatus, dto.getStatus()));
 
-            // 如果没有指定宿舍和床位，进入待分配状态
-            // 这里可以根据业务需求进行处理
+        // 如果审批通过，需要分配宿舍
+        if (Objects.equals(dto.getStatus(), CheckInStatusEnum.CHECKED_IN.getCode())) {
+
+            List<Bed> beds = bedMapper.selectList(Wrappers.<Bed>lambdaQuery()
+                    .eq(Bed::getDormitoryId, checkIn.getDormitoryId()));
+            Map<Long, Bed> bedMap = beds.stream().collect(Collectors.toMap(Bed::getId, Function.identity()));
+            Bed bed = bedMap.get(checkIn.getBedId());
+
+            Student student = studentMapper.selectById(checkIn.getStudentId());
+            bed.setStudentNo(student.getStudentNo());
+            bed.setName(student.getName());
+            bed.setStatus(2);
+            bedMapper.updateById(bed);
+
+
+            long availableBeds = beds.stream().
+                    filter(v -> Objects.equals(v.getStatus(), 1))
+                    .filter(v -> !Objects.equals(v.getId(), bed.getId()))
+                    .count();
+            long occupyCount = beds.size() - availableBeds;
+            dormitoryMapper.update(Wrappers.<Dormitory>lambdaUpdate()
+                    .eq(Dormitory::getId, checkIn.getDormitoryId())
+                    .set(Dormitory::getAvailableBeds,availableBeds)
+                    .set(Dormitory::getOccupiedBeds,occupyCount)
+                    .set(Dormitory::getStatus,availableBeds == 0 ? 0 : 1));
+
         }
 
         return result;
@@ -179,7 +196,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             throw new RuntimeException("入住记录不存在");
         }
 
-        if (checkIn.getStatus() != 1) {
+        if (checkIn.getStatus() != CheckInStatusEnum.CHECKED_IN.getCode()) {
             throw new RuntimeException("只能为已入住的记录分配宿舍");
         }
 
@@ -214,7 +231,6 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             // 更新学生宿舍信息
             Student student = new Student();
             student.setId(checkIn.getStudentId());
-            student.setDormitoryId(dormitoryId);
 //            student.setBedNo(bedNo);
             student.setUpdateBy(updateBy);
             student.setUpdateTime(LocalDateTime.now());
@@ -232,7 +248,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             throw new RuntimeException("入住记录不存在");
         }
 
-        if (checkIn.getStatus() != 1) {
+        if (checkIn.getStatus() != CheckInStatusEnum.CHECKED_IN.getCode()) {
             throw new RuntimeException("只能为已入住的记录办理退宿");
         }
 
@@ -242,7 +258,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
 //        }
 
         // 更新入住记录
-        checkIn.setStatus(2); // 已退宿
+        checkIn.setStatus(CheckInStatusEnum.CHECKED_OUT.getCode()); // 已退宿
 //        checkIn.setActualCheckoutDate(LocalDateTime.now());
         checkIn.setCheckoutReason(checkoutReason);
         checkIn.setUpdateTime(LocalDateTime.now());
@@ -254,7 +270,6 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         if (result) {
             Student student = new Student();
             student.setId(checkIn.getStudentId());
-            student.setDormitoryId(null);
 //            student.setBedNo(null);
             student.setUpdateBy(updateBy);
             student.setUpdateTime(LocalDateTime.now());
@@ -272,11 +287,11 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             throw new RuntimeException("入住申请不存在");
         }
 
-        if (checkIn.getStatus() != 0) {
+        if (checkIn.getStatus() != CheckInStatusEnum.APPLYING.getCode()) {
             throw new RuntimeException("只能取消申请中的记录");
         }
 
-        checkIn.setStatus(3); // 已拒绝
+        checkIn.setStatus(CheckInStatusEnum.REJECTED.getCode()); // 已拒绝
         checkIn.setApprovalRemark("取消申请：" + reason);
         checkIn.setApprover(updateBy);
         checkIn.setApprovalTime(LocalDateTime.now());
@@ -288,15 +303,16 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> batchApprove(List<String> ids, Integer status, String approvalRemark, String approver) {
+    public Map<String, Object> batchApprove(BatchCheckInApprovalDTO  dto) {
         Map<String, Object> result = new HashMap<>();
         int successCount = 0;
         int failCount = 0;
         List<String> errorMessages = new ArrayList<>();
-
-        for (String id : ids) {
+        CheckInApprovalDTO approvalDTO = BeanUtil.copyProperties(dto, CheckInApprovalDTO.class);
+        for (Long id : dto.getIds()) {
             try {
-                boolean success = approveCheckIn(id, status, approvalRemark, approver);
+                approvalDTO.setId(id);
+                boolean success = approveCheckIn(approvalDTO);
                 if (success) {
                     successCount++;
                 } else {
@@ -309,11 +325,10 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
             }
         }
 
-        result.put("totalCount", ids.size());
+        result.put("totalCount", dto.getIds().size());
         result.put("successCount", successCount);
         result.put("failCount", failCount);
         result.put("errorMessages", errorMessages);
-
         return result;
     }
 
@@ -329,25 +344,25 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
 
         // 申请中数量
         LambdaQueryWrapper<CheckIn> applyingQuery = new LambdaQueryWrapper<>();
-        applyingQuery.eq(CheckIn::getStatus, 0).eq(CheckIn::getDeleted, 0);
+        applyingQuery.eq(CheckIn::getStatus, CheckInStatusEnum.APPLYING.getCode()).eq(CheckIn::getDeleted, 0);
         long applyingCount = this.count(applyingQuery);
         statistics.put("applyingCount", applyingCount);
 
         // 已入住数量
         LambdaQueryWrapper<CheckIn> checkedInQuery = new LambdaQueryWrapper<>();
-        checkedInQuery.eq(CheckIn::getStatus, 1).eq(CheckIn::getDeleted, 0);
+        checkedInQuery.eq(CheckIn::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()).eq(CheckIn::getDeleted, 0);
         long checkedInCount = this.count(checkedInQuery);
         statistics.put("checkedInCount", checkedInCount);
 
         // 已退宿数量
         LambdaQueryWrapper<CheckIn> checkedOutQuery = new LambdaQueryWrapper<>();
-        checkedOutQuery.eq(CheckIn::getStatus, 2).eq(CheckIn::getDeleted, 0);
+        checkedOutQuery.eq(CheckIn::getStatus, CheckInStatusEnum.CHECKED_OUT.getCode()).eq(CheckIn::getDeleted, 0);
         long checkedOutCount = this.count(checkedOutQuery);
         statistics.put("checkedOutCount", checkedOutCount);
 
         // 已拒绝数量
         LambdaQueryWrapper<CheckIn> rejectedQuery = new LambdaQueryWrapper<>();
-        rejectedQuery.eq(CheckIn::getStatus, 3).eq(CheckIn::getDeleted, 0);
+        rejectedQuery.eq(CheckIn::getStatus, CheckInStatusEnum.REJECTED.getCode()).eq(CheckIn::getDeleted, 0);
         long rejectedCount = this.count(rejectedQuery);
         statistics.put("rejectedCount", rejectedCount);
 
@@ -370,7 +385,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
     public List<CheckInVO> getCheckInsByDormitoryId(String dormitoryId) {
         LambdaQueryWrapper<CheckIn> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
-                   .eq(CheckIn::getStatus, 1) // 只查询已入住的
+                   .eq(CheckIn::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()) // 只查询已入住的
                    .eq(CheckIn::getDeleted, 0)
                    .orderByDesc(CheckIn::getCreateTime);
 
@@ -382,7 +397,7 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
     public CheckInVO getCheckInByBedId(String bedId) {
         LambdaQueryWrapper<CheckIn> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CheckIn::getBedId, bedId)
-                   .eq(CheckIn::getStatus, 1) // 只查询已入住的
+                   .eq(CheckIn::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()) // 只查询已入住的
                    .eq(CheckIn::getDeleted, 0);
 
         CheckIn checkIn = this.getOne(queryWrapper);
@@ -394,22 +409,8 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         BeanUtils.copyProperties(checkIn, vo);
 
         // 设置状态文本
-        switch (checkIn.getStatus()) {
-            case 0:
-                vo.setStatusText("申请中");
-                break;
-            case 1:
-                vo.setStatusText("已入住");
-                break;
-            case 2:
-                vo.setStatusText("已退宿");
-                break;
-            case 3:
-                vo.setStatusText("已拒绝");
-                break;
-            default:
-                vo.setStatusText("未知");
-        }
+        CheckInStatusEnum statusEnum = CheckInStatusEnum.getByCode(checkIn.getStatus());
+        vo.setStatusText(statusEnum != null ? statusEnum.getDescription() : "未知");
 
         // 获取学生信息
         Student student = studentMapper.selectById(checkIn.getStudentId());

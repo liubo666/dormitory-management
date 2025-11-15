@@ -32,7 +32,7 @@ public interface CheckInService extends IService<CheckIn> {
     /**
      * 审批入住申请
      */
-    boolean approveCheckIn(String id, Integer status, String approvalRemark, String approver);
+    boolean approveCheckIn(CheckInApprovalDTO  dto);
 
     /**
      * 分配宿舍
@@ -52,7 +52,7 @@ public interface CheckInService extends IService<CheckIn> {
     /**
      * 批量审批入住申请
      */
-    Map<String, Object> batchApprove(List<String> ids, Integer status, String approvalRemark, String approver);
+    Map<String, Object> batchApprove(BatchCheckInApprovalDTO  dto);
 
     /**
      * 获取入住统计信息

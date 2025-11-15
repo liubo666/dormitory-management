@@ -143,7 +143,8 @@
                   <el-icon><View /></el-icon>
                   详情
                 </el-button>
-                <el-button size="small" @click="handleEdit(row)" >
+                <el-button size="small" @click="handleEdit(row)"
+                           :disabled="row.checkInStatus ===2||row.checkInStatus ===1">
                   <el-icon><Edit /></el-icon>
                   编辑
                 </el-button>
@@ -369,7 +370,7 @@
           <el-descriptions-item label="入学日期">{{ studentDetail.enrollmentDate || '未填写' }}</el-descriptions-item>
           <el-descriptions-item label="毕业日期">{{ studentDetail.graduationDate || '未填写' }}</el-descriptions-item>
           <el-descriptions-item label="宿舍信息" :span="2">
-            <span v-if="studentDetail.dormitoryId">
+            <span v-if="studentDetail.checkInStatus">
               {{ studentDetail.buildingName }} - {{ studentDetail.roomNo }} - {{ studentDetail.bedNo }}号床位
             </span>
             <span v-else>未分配宿舍</span>

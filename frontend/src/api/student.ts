@@ -72,6 +72,7 @@ export interface Student {
   updateTime: string
   createBy?: string
   updateBy?: string
+  checkInStatus :number
 }
 
 // 宿舍分配数据

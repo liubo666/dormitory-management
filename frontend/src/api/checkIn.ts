@@ -6,7 +6,6 @@ export interface CheckInParams {
   studentName?: string
   studentNo?: string
   dormitoryId?: string
-  buildingId?: string
   roomNo?: string
   bedNo?: string
   status?: number
@@ -98,10 +97,14 @@ export function submitApplication(data: CheckInForm): Promise<void> {
 /**
  * 审批入住申请
  */
-export function approveApplication(id: string, status: number, approvalRemark?: string): Promise<void> {
-  return request.put(`/check-in/${id}/approve`, null, {
-    params: { status, approvalRemark }
-  })
+export interface CheckInApprovalDTO {
+  id: string | number
+  status: number
+  approvalRemark?: string
+}
+
+export function approveApplication(data: CheckInApprovalDTO): Promise<void> {
+  return request.post('/check-in/approve', data)
 }
 
 /**
@@ -139,15 +142,19 @@ export function cancelApplication(id: string, reason: string): Promise<void> {
 /**
  * 批量审批入住申请
  */
-export function batchApprove(ids: string[], status: number, approvalRemark?: string): Promise<{
+export interface BatchCheckInApprovalDTO {
+  ids: (string | number)[]
+  status: number
+  approvalRemark?: string
+}
+
+export function batchApprove(data: BatchCheckInApprovalDTO): Promise<{
   totalCount: number
   successCount: number
   failCount: number
   errorMessages: string[]
 }> {
-  return request.post('/check-in/batch-approve', ids, {
-    params: { status, approvalRemark }
-  })
+  return request.post('/check-in/batch-approve', data)
 }
 
 /**

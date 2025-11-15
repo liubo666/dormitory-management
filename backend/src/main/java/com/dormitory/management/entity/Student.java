@@ -95,10 +95,10 @@ public class Student implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate graduationDate;
 
-    /**
-     * 宿舍ID
-     */
-    private String dormitoryId;
+//    /**
+//     * 宿舍ID
+//     */
+//    private String dormitoryId;
 
     /**
 //     * 床位号
@@ -163,4 +163,6 @@ public class Student implements Serializable {
      */
     @TableLogic
     private Integer deleted;
+
+
 }

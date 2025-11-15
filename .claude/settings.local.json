@@ -14,7 +14,10 @@
       "Bash(./mvnw:*)",
       "Bash(find:*)",
       "Bash(npm install:*)",
-      "Bash(mvn spring-boot:run:*)"
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(cat:*)",
+      "Bash(node:*)",
+      "Bash(temp_script.ts)"
     ],
     "deny": [],
     "ask": []

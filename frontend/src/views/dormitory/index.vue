@@ -124,6 +124,7 @@
                   </el-button>
                   <el-button
                     size="small"
+                    :disabled="row.occupiedBeds > 0"
                     :type="getStatusButtonType(row.status)"
                     @click="handleToggleStatus(row)"
                   >
@@ -306,7 +307,7 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="studentName" label="入住学生" />
+          <el-table-column prop="name" label="入住学生" />
           <el-table-column prop="studentNo" label="学号" width="120" />
           <el-table-column prop="description" label="备注" />
         </el-table>

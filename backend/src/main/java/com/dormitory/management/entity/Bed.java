@@ -47,4 +47,17 @@ public class Bed {
     private String description;
 
 
+
+    /**
+     * 学号
+     */
+    @TableField("student_no")
+    private String studentNo;
+
+    /**
+     * 姓名
+     */
+    @TableField("name")
+    private String name;
+
 }

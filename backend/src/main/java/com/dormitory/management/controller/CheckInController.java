@@ -71,14 +71,11 @@ public class CheckInController {
     }
 
     @Operation(summary = "审批入住申请")
-    @PutMapping("/{id}/approve")
-    public Result<Void> approveApplication(
-            @Parameter(description = "入住记录ID") @PathVariable String id,
-            @Parameter(description = "审批状态") @RequestParam Integer status,
-            @Parameter(description = "审批备注") @RequestParam(required = false) String approvalRemark) {
+    @PostMapping("/approve")
+    public Result<Void> approveApplication(@Validated @RequestBody CheckInApprovalDTO approvalDTO) {
         try {
-            String currentUser = getCurrentUser();
-            boolean success = checkInService.approveCheckIn(id, status, approvalRemark, currentUser);
+            boolean success = checkInService.approveCheckIn(
+                    approvalDTO);
             if (success) {
                 return Result.success();
             } else {
@@ -148,12 +145,9 @@ public class CheckInController {
     @Operation(summary = "批量审批入住申请")
     @PostMapping("/batch-approve")
     public Result<Map<String, Object>> batchApprove(
-            @RequestBody List<String> ids,
-            @RequestParam Integer status,
-            @RequestParam(required = false) String approvalRemark) {
+           @RequestBody BatchCheckInApprovalDTO  dto) {
         try {
-            String currentUser = getCurrentUser();
-            Map<String, Object> result = checkInService.batchApprove(ids, status, approvalRemark, currentUser);
+            Map<String, Object> result = checkInService.batchApprove(dto);
             return Result.success(result);
         } catch (Exception e) {
             return Result.error(e.getMessage());

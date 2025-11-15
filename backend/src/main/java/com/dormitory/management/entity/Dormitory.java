@@ -102,4 +102,6 @@ public class Dormitory implements Serializable {
      */
     @TableLogic
     private Integer deleted;
+
+
 }

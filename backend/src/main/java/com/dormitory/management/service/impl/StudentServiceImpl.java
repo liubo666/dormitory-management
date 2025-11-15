@@ -1,14 +1,19 @@
 package com.dormitory.management.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dormitory.management.dto.DormitoryAssignmentDTO;
 import com.dormitory.management.dto.StudentDTO;
 import com.dormitory.management.dto.StudentPageDTO;
+import com.dormitory.management.entity.Bed;
 import com.dormitory.management.entity.Dormitory;
 import com.dormitory.management.entity.Student;
+import com.dormitory.management.enums.CheckInStatusEnum;
+import com.dormitory.management.mapper.BedMapper;
 import com.dormitory.management.mapper.DormitoryMapper;
 import com.dormitory.management.mapper.StudentMapper;
 import com.dormitory.management.service.DormitoryService;
@@ -26,6 +31,7 @@ import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +42,8 @@ import java.util.stream.Collectors;
 public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> implements StudentService {
 
     private final DormitoryMapper dormitoryMapper;
+
+    private final BedMapper bedMapper;
 
     @Override
     public Page<StudentVO> getStudentPage( StudentPageDTO pageDTO) {
@@ -71,9 +79,9 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
             queryWrapper.eq(Student::getGrade, pageDTO.getGrade());
         }
 
-        if (StringUtils.hasText(pageDTO.getDormitoryId())) {
-            queryWrapper.eq(Student::getDormitoryId, pageDTO.getDormitoryId());
-        }
+//        if (StringUtils.hasText(pageDTO.getDormitoryId())) {
+//            queryWrapper.eq(Student::getDormitoryId, pageDTO.getDormitoryId());
+//        }
 
         if (pageDTO.getStatus() != null) {
             queryWrapper.eq(Student::getStatus, pageDTO.getStatus());
@@ -87,7 +95,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 
         // 转换为VO对象
         List<StudentVO> studentVOList = studentPage.getRecords().stream()
-                .map(this::convertToVO)
+                .map(v-> BeanUtil.copyProperties(v,StudentVO.class))
                 .collect(Collectors.toList());
 
         // 构建返回结果
@@ -168,7 +176,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         }
 
         // 检查是否已分配宿舍
-        if (StringUtils.hasText(student.getDormitoryId())) {
+        if (Objects.equals(student.getCheckInStatus(),CheckInStatusEnum.CHECKED_IN.getCode())) {
             throw new RuntimeException("学生已分配宿舍，请先退宿后再删除");
         }
 
@@ -184,9 +192,9 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         }
 
         // 如果设置为毕业状态，检查是否已退宿
-        if (status == 2 && StringUtils.hasText(student.getDormitoryId())) {
-            throw new RuntimeException("学生已分配宿舍，请先退宿后再设置为毕业状态");
-        }
+//        if (status == 2 && StringUtils.hasText(student.getDormitoryId())) {
+//            throw new RuntimeException("学生已分配宿舍，请先退宿后再设置为毕业状态");
+//        }
 
         LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Student::getId, id)
@@ -228,7 +236,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 //        }
 
         // 检查学生是否已分配宿舍
-        if (StringUtils.hasText(student.getDormitoryId())) {
+        if (Objects.equals(student.getCheckInStatus(),CheckInStatusEnum.CHECKED_IN.getCode())) {
             throw new RuntimeException("学生已分配宿舍，请先退宿后再重新分配");
         }
 
@@ -273,10 +281,10 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
             throw new RuntimeException("学生不存在");
         }
 
-        // 检查是否已分配宿舍
-        if (!StringUtils.hasText(student.getDormitoryId())) {
-            throw new RuntimeException("学生未分配宿舍，无法调换");
-        }
+//        // 检查是否已分配宿舍
+//        if (!StringUtils.hasText(student.getDormitoryId())) {
+//            throw new RuntimeException("学生未分配宿舍，无法调换");
+//        }
 
         // 检查新宿舍是否可用
         Dormitory newDormitory = dormitoryMapper.selectById(newDormitoryId);
@@ -289,12 +297,12 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         }
 
         // 检查新床位是否可用
-        if (!student.getDormitoryId().equals(newDormitoryId)) {
-            // 换到不同宿舍，检查床位数量
-//            if (newDormitory.getOccupiedBeds() >= newDormitory.getBedCount()) {
-//                throw new RuntimeException("新宿舍已满，无法调换");
-//            }
-        }
+//        if (!student.getDormitoryId().equals(newDormitoryId)) {
+//            // 换到不同宿舍，检查床位数量
+////            if (newDormitory.getOccupiedBeds() >= newDormitory.getBedCount()) {
+////                throw new RuntimeException("新宿舍已满，无法调换");
+////            }
+//        }
 
 //        // 检查新床位是否已被占用
 //        LambdaQueryWrapper<Student> bedQuery = new LambdaQueryWrapper<>();
@@ -351,16 +359,14 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         }
 
         // 检查是否已分配宿舍
-        if (!StringUtils.hasText(student.getDormitoryId())) {
+        if (!Objects.equals(student.getCheckInStatus(),CheckInStatusEnum.CHECKED_IN.getCode())) {
             throw new RuntimeException("学生未分配宿舍，无法退宿");
         }
 
-        String dormitoryId = student.getDormitoryId();
 
         // 退宿
         LambdaUpdateWrapper<Student> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Student::getId, studentId)
-                    .set(Student::getDormitoryId, null)
 //                    .set(Student::getBedNo, null)
                     .set(Student::getUpdateTime, LocalDateTime.now())
                     .set(Student::getUpdateBy, updateBy);
@@ -368,13 +374,13 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         boolean result = this.update(updateWrapper);
 
         if (result) {
-            // 更新宿舍入住人数
-            Dormitory dormitory = dormitoryMapper.selectById(dormitoryId);
-            LambdaUpdateWrapper<Dormitory> dormitoryUpdate = new LambdaUpdateWrapper<>();
-            dormitoryUpdate.eq(Dormitory::getId, dormitoryId)
-                          .set(Dormitory::getOccupiedBeds, Math.max(0, dormitory.getOccupiedBeds() - 1))
-                          .set(Dormitory::getUpdateTime, LocalDateTime.now());
-            dormitoryMapper.update(null, dormitoryUpdate);
+//            // 更新宿舍入住人数
+//            Dormitory dormitory = dormitoryMapper.selectById(dormitoryId);
+//            LambdaUpdateWrapper<Dormitory> dormitoryUpdate = new LambdaUpdateWrapper<>();
+//            dormitoryUpdate.eq(Dormitory::getId, dormitoryId)
+//                          .set(Dormitory::getOccupiedBeds, Math.max(0, dormitory.getOccupiedBeds() - 1))
+//                          .set(Dormitory::getUpdateTime, LocalDateTime.now());
+//            dormitoryMapper.update(null, dormitoryUpdate);
         }
 
         return result;
@@ -383,7 +389,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     @Override
     public List<StudentVO> getStudentsByDormitory(String dormitoryId) {
         LambdaQueryWrapper<Student> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Student::getDormitoryId, dormitoryId)
+        queryWrapper
                    .eq(Student::getDeleted, 0);
 //                   .orderByAsc(Student::getBedNo);
 
@@ -424,8 +430,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 
         // 入住学生数
         LambdaQueryWrapper<Student> dormitoryQuery = new LambdaQueryWrapper<>();
-        dormitoryQuery.eq(Student::getDeleted, 0)
-                      .isNotNull(Student::getDormitoryId);
+        dormitoryQuery.eq(Student::getDeleted, 0);
         long dormitoryCount = this.count(dormitoryQuery);
         statistics.put("dormitoryCount", dormitoryCount);
 
@@ -514,34 +519,32 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
         // 设置性别文本
         studentVO.setGenderText(student.getGender() == 1 ? "男" : "女");
 
-//        // 计算年龄
-//        if (student.getBirthDate() != null) {
-//            int age = Period.between(student.getBirthDate(), LocalDate.now()).getYears();
-//            studentVO.setAge(age);
-//        }
+        // 计算年龄
+        if (student.getBirthDate() != null) {
+            int age = Period.between(student.getBirthDate(), LocalDate.now()).getYears();
+            studentVO.setAge(age);
+        }
 
         // 设置状态文本
         studentVO.setStatusText(getStatusText(student.getStatus()));
 
         // 查询宿舍信息
-        if (StringUtils.hasText(student.getDormitoryId())) {
-//            Dormitory dormitory = dormitoryMapper.selectById(student.getDormitoryId());
-//            if (dormitory != null && dormitory.getDeleted() == 0) {
-//                studentVO.setRoomNo(dormitory.getRoomNo());
-//
-//                // 查询楼栋信息
-//                LambdaQueryWrapper<Dormitory> buildingQuery = new LambdaQueryWrapper<>();
-//                buildingQuery
-//                           .eq(Dormitory::getDeleted, 0);
-//                Dormitory buildingDormitory = dormitoryMapper.selectOne(buildingQuery);
-//                if (buildingDormitory != null) {
-//                    // 这里需要通过关联查询获取楼栋名称，简化处理
-////                    studentVO.setBuildingName(dormitory.getBuildingId());
-//                }
-//            }
+        if (Objects.equals(student.getCheckInStatus(), CheckInStatusEnum.CHECKED_IN.getCode())) {
+
+            Bed bed = getBed(student);
+            studentVO.setBedNo(bed.getBedNo());
+            Dormitory dormitory = dormitoryMapper.selectById(bed.getDormitoryId());
+            studentVO.setBuildingName(dormitory.getBuildingName());
+            studentVO.setRoomNo(dormitory.getRoomNo());
+
         }
 
         return studentVO;
+    }
+
+    private Bed getBed(Student student) {
+        return bedMapper.selectOne(Wrappers.<Bed>lambdaQuery()
+                .eq(Bed::getStudentNo, student.getStudentNo()));
     }
 
     /**

@@ -16,7 +16,8 @@ public class CheckInVO {
     /**
      * 入住记录ID
      */
-    private String id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;
 
     /**
      * 学生ID

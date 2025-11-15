@@ -50,19 +50,19 @@
             </div>
           </el-card>
         </el-col>
-        <el-col :span="6">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon checked-out">
-                <el-icon><CircleClose /></el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-number">{{ statistics.checkedOutCount }}</div>
-                <div class="stats-label">已退宿</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
+<!--        <el-col :span="6">-->
+<!--          <el-card class="stats-card">-->
+<!--            <div class="stats-content">-->
+<!--              <div class="stats-icon checked-out">-->
+<!--                <el-icon><CircleClose /></el-icon>-->
+<!--              </div>-->
+<!--              <div class="stats-info">-->
+<!--                <div class="stats-number">{{ statistics.checkedOutCount }}</div>-->
+<!--                <div class="stats-label">已退宿</div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </el-card>-->
+<!--        </el-col>-->
         <el-col :span="6">
           <el-card class="stats-card">
             <div class="stats-content">
@@ -99,22 +99,7 @@
               style="width: 200px"
             />
           </el-form-item>
-          <el-form-item label="楼栋">
-            <el-select
-              v-model="searchForm.buildingId"
-              placeholder="请选择楼栋"
-              clearable
-              style="width: 200px"
-            >
-              <el-option
-                v-for="building in buildingOptions"
-                :key="building.value"
-                :label="building.label"
-                :value="building.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="宿舍号">
+                    <el-form-item label="宿舍号">
             <el-input
               v-model="searchForm.roomNo"
               placeholder="请输入宿舍号"
@@ -176,15 +161,15 @@
               @click="handleBatchApprove"
             >
               <el-icon><Select /></el-icon>
-              批量审批
+              批量通过
             </el-button>
             <el-button
-              type="warning"
+              type="danger"
               :disabled="!selectedRows.length"
-              @click="handleBatchCheckout"
+              @click="handleBatchReject"
             >
-              <el-icon><Switch /></el-icon>
-              批量退宿
+              <el-icon><Close /></el-icon>
+              批量拒绝
             </el-button>
           </div>
         </div>
@@ -225,31 +210,31 @@
                   详情
                 </el-button>
                 <el-button
-                  v-if="row.status === 0"
+                  v-if="row.status === 1"
                   size="small"
                   type="success"
                   @click="handleApprove(row)"
                 >
                   <el-icon><Check /></el-icon>
-                  审批
+                  审批通过
                 </el-button>
+<!--                <el-button-->
+<!--                  v-if="row.status === 1"-->
+<!--                  size="small"-->
+<!--                  type="success"-->
+<!--                  @click="handleAssign(row)"-->
+<!--                >-->
+<!--                  <el-icon><Check /></el-icon>-->
+<!--                  审批通过-->
+<!--                </el-button>-->
                 <el-button
                   v-if="row.status === 1"
                   size="small"
-                  type="primary"
-                  @click="handleAssign(row)"
+                  type="danger"
+                  @click="handleReject(row)"
                 >
-                  <el-icon><Position /></el-icon>
-                  分配
-                </el-button>
-                <el-button
-                  v-if="row.status === 1"
-                  size="small"
-                  type="warning"
-                  @click="handleCheckout(row)"
-                >
-                  <el-icon><Switch /></el-icon>
-                  退宿
+                  <el-icon><Close /></el-icon>
+                  拒绝
                 </el-button>
                 <el-button
                   v-if="row.status === 0"
@@ -260,6 +245,15 @@
                   <el-icon><Close /></el-icon>
                   取消
                 </el-button>
+<!--                <el-button-->
+<!--                  v-if="row.status === 2"-->
+<!--                  size="small"-->
+<!--                  type="warning"-->
+<!--                  @click="handleCheckout(row)"-->
+<!--                >-->
+<!--                  <el-icon><Switch /></el-icon>-->
+<!--                  退宿-->
+<!--                </el-button>-->
               </el-button-group>
             </template>
           </el-table-column>
@@ -370,8 +364,8 @@
       >
         <el-form-item label="审批结果" prop="status">
           <el-radio-group v-model="approvalForm.status">
-            <el-radio :value="1">通过</el-radio>
-            <el-radio :value="3">拒绝</el-radio>
+            <el-radio :value="2">通过</el-radio>
+            <el-radio :value="4">拒绝</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="审批备注">
@@ -393,74 +387,38 @@
       </template>
     </el-dialog>
 
-    <!-- 分配宿舍对话框 -->
+    <!-- 审批通过对话框 -->
     <el-dialog
       v-model="showAssignDialog"
-      title="分配宿舍"
-      width="600px"
+      title="审批通过入住申请"
+      width="500px"
       :close-on-click-modal="false"
     >
       <el-form
         :model="assignForm"
-        :rules="assignRules"
         ref="assignFormRef"
         label-width="100px"
       >
         <el-form-item label="学生">
           <el-input :value="currentRecord?.studentName" disabled />
         </el-form-item>
-        <el-form-item label="楼栋" prop="buildingId">
-          <el-select
-            v-model="assignForm.buildingId"
-            placeholder="请选择楼栋"
-            @change="handleBuildingChange"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="building in buildingOptions"
-              :key="building.value"
-              :label="building.label"
-              :value="building.value"
-            />
-          </el-select>
+        <el-form-item label="学号">
+          <el-input :value="currentRecord?.studentNo" disabled />
         </el-form-item>
-        <el-form-item label="宿舍" prop="dormitoryId">
-          <el-select
-            v-model="assignForm.dormitoryId"
-            placeholder="请选择宿舍"
-            @change="handleDormitoryChange"
-            style="width: 100%"
-            :disabled="!assignForm.buildingId"
-          >
-            <el-option
-              v-for="dormitory in dormitoryOptions"
-              :key="dormitory.value"
-              :label="dormitory.label"
-              :value="dormitory.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="床位" prop="bedId">
-          <el-select
-            v-model="assignForm.bedId"
-            placeholder="请选择床位"
-            style="width: 100%"
-            :disabled="!assignForm.dormitoryId"
-          >
-            <el-option
-              v-for="bed in bedOptions"
-              :key="bed.value"
-              :label="bed.label"
-              :value="bed.value"
-            />
-          </el-select>
+        <el-form-item label="审批备注">
+          <el-input
+            v-model="assignForm.approvalRemark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入审批备注"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="showAssignDialog = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmitAssignment" :loading="submitting">
-            确认分配
+          <el-button type="success" @click="handleSubmitAssignment" :loading="submitting">
+            确认审批通过
           </el-button>
         </span>
       </template>
@@ -570,7 +528,6 @@ import {
   getCheckInPage,
   submitApplication,
   approveApplication,
-  assignDormitory,
   checkout,
   cancelApplication,
   batchApprove,
@@ -578,7 +535,7 @@ import {
   getAvailableStudents,
   getAvailableBeds
 } from '@/api/checkIn'
-import type { CheckIn, CheckInForm, CheckInParams, AvailableStudentsParams, AvailableStudentsResponse } from '@/api/checkIn'
+import type { CheckIn, CheckInForm, CheckInParams, AvailableStudentsParams, AvailableStudentsResponse, CheckInApprovalDTO, BatchCheckInApprovalDTO } from '@/api/checkIn'
 
 // 响应式数据
 const loading = ref(false)
@@ -601,7 +558,6 @@ const statistics = ref({
 const searchForm = reactive<CheckInParams>({
   studentName: '',
   studentNo: '',
-  buildingId: '',
   roomNo: '',
   status: undefined,
   checkInStartDate: '',
@@ -658,15 +614,13 @@ const applicationForm = reactive<CheckInForm>({
 
 // 审批表单
 const approvalForm = reactive({
-  status: 1,
+  status: 2,
   approvalRemark: ''
 })
 
-// 分配表单
+// 分配表单（审批通过）
 const assignForm = reactive({
-  buildingId: '',
-  dormitoryId: '',
-  bedId: ''
+  approvalRemark: ''
 })
 
 // 退宿表单
@@ -675,9 +629,6 @@ const checkoutForm = reactive({
 })
 
 // 选项数据
-const buildingOptions = ref<{label: string, value: string}[]>([])
-const dormitoryOptions = ref<{label: string, value: string}[]>([])
-const bedOptions = ref<{label: string, value: string}[]>([])
 const studentOptions = ref<{label: string, value: string}[]>([])
 
 // 表单验证规则
@@ -691,11 +642,6 @@ const approvalRules = {
   status: [{ required: true, message: '请选择审批结果', trigger: 'change' }]
 }
 
-const assignRules = {
-  buildingId: [{ required: true, message: '请选择楼栋', trigger: 'change' }],
-  dormitoryId: [{ required: true, message: '请选择宿舍', trigger: 'change' }],
-  bedId: [{ required: true, message: '请选择床位', trigger: 'change' }]
-}
 
 // 获取状态类型
 const getStatusType = (status: number) => {
@@ -824,7 +770,6 @@ const handleReset = () => {
   Object.assign(searchForm, {
     studentName: '',
     studentNo: '',
-    buildingId: '',
     roomNo: '',
     status: undefined,
     checkInStartDate: '',
@@ -904,7 +849,7 @@ const handleSubmitApplication = async () => {
 const handleApprove = (row: CheckIn) => {
   currentRecord.value = row
   Object.assign(approvalForm, {
-    status: 1,
+    status: 2,
     approvalRemark: ''
   })
   showApprovalDialog.value = true
@@ -916,12 +861,17 @@ const handleSubmitApproval = async () => {
   await approvalFormRef.value.validate(async (valid) => {
     if (valid) {
       submitting.value = true
+      if (!currentRecord.value) {
+        ElMessage.warning('请选择需要分配的记录')
+        return
+      }
       try {
-        await approveApplication(
-          currentRecord.value.id,
-          approvalForm.status,
-          approvalForm.approvalRemark
-        )
+        const approvalData: CheckInApprovalDTO = {
+          id: currentRecord.value.id,
+          status: approvalForm.status,
+          approvalRemark: approvalForm.approvalRemark
+        }
+        await approveApplication(approvalData)
         ElMessage.success('审批成功')
         showApprovalDialog.value = false
         loadData()
@@ -936,57 +886,71 @@ const handleSubmitApproval = async () => {
   })
 }
 
-// 分配宿舍
+// 审批通过
 const handleAssign = (row: CheckIn) => {
   currentRecord.value = row
   Object.assign(assignForm, {
-    buildingId: '',
-    dormitoryId: '',
-    bedId: ''
+    approvalRemark: ''
   })
-  dormitoryOptions.value = []
-  bedOptions.value = []
   showAssignDialog.value = true
 }
 
-const handleBuildingChange = () => {
-  assignForm.dormitoryId = ''
-  assignForm.bedId = ''
-  // TODO: 应该调用后端接口获取该楼栋下的宿舍列表
-  dormitoryOptions.value = []
-  bedOptions.value = []
-}
-
-const handleDormitoryChange = () => {
-  assignForm.bedId = ''
-  // TODO: 应该调用后端接口获取该宿舍的可用床位列表
-  bedOptions.value = []
-}
 
 const handleSubmitAssignment = async () => {
-  if (!currentRecord.value || !assignFormRef.value) return
+  if (!currentRecord.value) return
 
-  await assignFormRef.value.validate(async (valid) => {
-    if (valid) {
-      submitting.value = true
-      try {
-        await assignDormitory(
-          currentRecord.value.id,
-          assignForm.dormitoryId,
-          assignForm.bedId,
-          bedOptions.value.find(bed => bed.value === assignForm.bedId)?.label || ''
-        )
-        ElMessage.success('宿舍分配成功')
-        showAssignDialog.value = false
-        loadData()
-        loadStatistics()
-      } catch (error) {
-        ElMessage.error('宿舍分配失败')
-        console.error(error)
-      } finally {
-        submitting.value = false
-      }
+  submitting.value = true
+  try {
+    const approvalData: CheckInApprovalDTO = {
+      id: currentRecord.value.id,
+      status: 2, // 已入住
+      approvalRemark: assignForm.approvalRemark || '审批通过'
     }
+    await approveApplication(approvalData)
+    ElMessage.success('审批通过成功')
+    showAssignDialog.value = false
+    loadData()
+    loadStatistics()
+  } catch (error) {
+    ElMessage.error('审批通过失败')
+    console.error(error)
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 拒绝
+const handleReject = (row: CheckIn) => {
+  currentRecord.value = row
+
+  ElMessageBox.prompt('请输入拒绝原因', '拒绝入住申请', {
+    confirmButtonText: '确定拒绝',
+    cancelButtonText: '取消',
+    type: 'warning',
+    inputPlaceholder: '请输入拒绝原因',
+    inputValidator: (value) => {
+      if (!value || !value.trim()) {
+        return '拒绝原因不能为空'
+      }
+      return true
+    }
+  }).then(async ({ value }) => {
+    try {
+      const approvalData: CheckInApprovalDTO = {
+        id: currentRecord.value!.id,
+        status: 4, // 已拒绝
+        approvalRemark: value
+      }
+      await approveApplication(approvalData)
+      ElMessage.success('拒绝成功')
+      loadData()
+      loadStatistics()
+    } catch (error) {
+      ElMessage.error('拒绝失败')
+      console.error(error)
+    }
+  }).catch(() => {
+    ElMessage.info('已取消拒绝操作')
   })
 }
 
@@ -1034,25 +998,86 @@ const handleCancel = (row: CheckIn) => {
   })
 }
 
-// 批量审批
+// 批量通过
 const handleBatchApprove = () => {
   if (!selectedRows.value.length) return
 
-  ElMessageBox.confirm(`确定要批量审批选中的 ${selectedRows.value.length} 条记录吗？`, '提示', {
-    confirmButtonText: '确定',
+  ElMessageBox.confirm(`确定要批量通过选中的 ${selectedRows.value.length} 条入住申请吗？`, '批量通过确认', {
+    confirmButtonText: '确定通过',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'success',
+    dangerouslyUseHTMLString: true,
+    message: `
+      <div style="color: #67C23A; font-size: 16px; margin-bottom: 10px;">
+        <i class="el-icon-success"></i> 确定批量通过以下入住申请？
+      </div>
+      <div style="color: #909399; font-size: 14px;">
+        共 ${selectedRows.value.length} 条记录，通过后将自动分配宿舍
+      </div>
+    `
   }).then(async () => {
     try {
       const ids = selectedRows.value.map(row => row.id)
-      await batchApprove(ids, 1, '批量审批通过')
-      ElMessage.success('批量审批成功')
+      const batchApprovalData: BatchCheckInApprovalDTO = {
+        ids: ids,
+        status: 2, // 已入住
+        approvalRemark: '批量审批通过'
+      }
+      await batchApprove(batchApprovalData)
+      ElMessage.success('批量通过成功')
       loadData()
       loadStatistics()
     } catch (error) {
-      ElMessage.error('批量审批失败')
+      ElMessage.error('批量通过失败')
       console.error(error)
     }
+  }).catch(() => {
+    ElMessage.info('已取消批量通过操作')
+  })
+}
+
+// 批量拒绝
+const handleBatchReject = () => {
+  if (!selectedRows.value.length) return
+
+  ElMessageBox.prompt('请输入拒绝原因', '批量拒绝确认', {
+    confirmButtonText: '确定拒绝',
+    cancelButtonText: '取消',
+    type: 'warning',
+    inputPlaceholder: '请输入拒绝原因',
+    inputValidator: (value) => {
+      if (!value || !value.trim()) {
+        return '拒绝原因不能为空'
+      }
+      return true
+    },
+    dangerouslyUseHTMLString: true,
+    message: `
+      <div style="color: #F56C6C; font-size: 16px; margin-bottom: 10px;">
+        <i class="el-icon-warning"></i> 确定要拒绝以下入住申请？
+      </div>
+      <div style="color: #909399; font-size: 14px; margin-bottom: 15px;">
+        共 ${selectedRows.value.length} 条记录，拒绝后将无法恢复
+      </div>
+    `
+  }).then(async ({ value }) => {
+    try {
+      const ids = selectedRows.value.map(row => row.id)
+      const batchApprovalData: BatchCheckInApprovalDTO = {
+        ids: ids,
+        status: 4, // 已拒绝
+        approvalRemark: `批量拒绝：${value}`
+      }
+      await batchApprove(batchApprovalData)
+      ElMessage.success('批量拒绝成功')
+      loadData()
+      loadStatistics()
+    } catch (error) {
+      ElMessage.error('批量拒绝失败')
+      console.error(error)
+    }
+  }).catch(() => {
+    ElMessage.info('已取消批量拒绝操作')
   })
 }
 
