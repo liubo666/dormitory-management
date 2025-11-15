@@ -16,7 +16,7 @@ public interface BedService extends IService<Bed> {
     /**
      * 根据宿舍ID获取床位列表
      */
-    List<BedInfoDTO> getBedsByDormitoryId(String dormitoryId);
+    List<BedInfoDTO> getBedsByDormitoryId(Long dormitoryId);
 
     /**
      * 创建宿舍的默认床位

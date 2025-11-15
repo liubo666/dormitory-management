@@ -51,7 +51,7 @@ public class StudentController {
     @Operation(summary = "根据ID获取学生详情")
     @GetMapping("/{id}")
     public Result<StudentVO> getStudentById(
-            @Parameter(description = "学生ID") @PathVariable String id) {
+            @Parameter(description = "学生ID") @PathVariable Long id) {
         StudentVO student = studentService.getStudentById(id);
         if (student == null) {
             return Result.error("学生不存在");
@@ -109,7 +109,7 @@ public class StudentController {
     @Operation(summary = "删除学生")
     @DeleteMapping("/{id}")
     public Result<Void> deleteStudent(
-            @Parameter(description = "学生ID") @PathVariable String id) {
+            @Parameter(description = "学生ID") @PathVariable Long id) {
         try {
             boolean success = studentService.deleteStudent(id);
             if (success) {
@@ -168,7 +168,7 @@ public class StudentController {
             @Parameter(description = "调换原因") @RequestParam(required = false) String reason) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = studentService.changeDormitory(id, newDormitoryId, newBedNo, reason, currentUser);
+            boolean success = studentService.changeDormitory(Long.parseLong(id), Long.parseLong(newDormitoryId), newBedNo, reason, currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -186,7 +186,7 @@ public class StudentController {
             @Parameter(description = "退宿原因") @RequestParam(required = false) String reason) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = studentService.checkoutDormitory(id, reason, currentUser);
+            boolean success = studentService.checkoutDormitory(Long.parseLong(id), reason, currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -201,7 +201,7 @@ public class StudentController {
     @GetMapping("/dormitory/{dormitoryId}")
     public Result<List<StudentVO>> getStudentsByDormitory(
             @Parameter(description = "宿舍ID") @PathVariable String dormitoryId) {
-        List<StudentVO> students = studentService.getStudentsByDormitory(dormitoryId);
+        List<StudentVO> students = studentService.getStudentsByDormitory(Long.parseLong(dormitoryId));
         return Result.success(students);
     }
 

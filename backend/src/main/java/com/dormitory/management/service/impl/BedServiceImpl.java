@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class BedServiceImpl extends ServiceImpl<BedMapper, Bed> implements BedService {
 
     @Override
-    public List<BedInfoDTO> getBedsByDormitoryId(String dormitoryId) {
+    public List<BedInfoDTO> getBedsByDormitoryId(Long dormitoryId) {
         LambdaQueryWrapper<Bed> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Bed::getDormitoryId, dormitoryId)
                    .orderByAsc(Bed::getBedNo);

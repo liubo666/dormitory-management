@@ -27,7 +27,7 @@ public interface DormitoryService extends IService<Dormitory> {
      * @param id 宿舍ID
      * @return 宿舍详情
      */
-    DormitoryVO getDormitoryById(String id);
+    DormitoryVO getDormitoryById(Long id);
 
     /**
      * 获取可用宿舍列表
@@ -35,7 +35,7 @@ public interface DormitoryService extends IService<Dormitory> {
      * @param buildingId 楼栋ID（可选）
      * @return 可用宿舍列表
      */
-    List<DormitoryVO> getAvailableDormitories(String buildingId);
+    List<DormitoryVO> getAvailableDormitories(Long buildingId);
 
     /**
      * 新增宿舍
@@ -51,7 +51,14 @@ public interface DormitoryService extends IService<Dormitory> {
      * @param id 宿舍ID
      * @return 是否成功
      */
-    boolean deleteDormitory(String id);
+    boolean deleteDormitory(Long id);
+
+    /**
+     * 获取所有宿舍选项列表
+     *
+     * @return 宿舍列表
+     */
+    List<DormitoryVO> getAllDormitories();
 
 
 }

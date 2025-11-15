@@ -19,89 +19,128 @@
     <div class="content-container">
       <div class="search-section">
         <el-card shadow="never">
-          <el-form :model="searchForm" inline class="search-form">
-            <el-form-item label="学号">
-              <el-input
-                v-model="searchForm.studentNo"
-                placeholder="请输入学号"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="姓名">
-              <el-input
-                v-model="searchForm.name"
-                placeholder="请输入姓名"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="学院">
-              <el-input
-                v-model="searchForm.college"
-                placeholder="请输入学院"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="专业">
-              <el-input
-                v-model="searchForm.major"
-                placeholder="请输入专业"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="性别">
-              <el-select
-                v-model="searchForm.gender"
-                placeholder="请选择性别"
-                clearable
-                style="width: 100px"
-              >
-                <el-option label="男" :value="1" />
-                <el-option label="女" :value="0" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="班级">
-              <el-input
-                v-model="searchForm.className"
-                placeholder="请输入班级"
-                clearable
-                style="width: 150px"
-              />
-            </el-form-item>
-            <el-form-item label="年级">
-              <el-input
-                v-model="searchForm.grade"
-                placeholder="请输入年级"
-                clearable
-                style="width: 120px"
-              />
-            </el-form-item>
-            <el-form-item label="状态">
-              <el-select
-                v-model="searchForm.status"
-                placeholder="请选择状态"
-                clearable
-                style="width: 120px"
-              >
-                <el-option label="在校" :value="1" />
-                <el-option label="休学" :value="0" />
-                <el-option label="毕业" :value="2" />
-                <el-option label="退学" :value="3" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleSearch">
-                <el-icon><Search /></el-icon>
-                搜索
-              </el-button>
-              <el-button @click="handleReset">
-                <el-icon><RefreshRight /></el-icon>
-                重置
-              </el-button>
-            </el-form-item>
+          <!-- 常用搜索区域（默认显示） -->
+          <el-form :model="searchForm" label-width="80px">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="学号">
+                  <el-input
+                    v-model="searchForm.studentNo"
+                    placeholder="请输入学号"
+                    clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="姓名">
+                  <el-input
+                    v-model="searchForm.name"
+                    placeholder="请输入姓名"
+                    clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="学院">
+                  <el-input
+                    v-model="searchForm.college"
+                    placeholder="请输入学院"
+                    clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="状态">
+                  <el-select
+                    v-model="searchForm.status"
+                    placeholder="请选择状态"
+                    clearable
+                    style="width: 100%"
+                  >
+                    <el-option label="在校" :value="1" />
+                    <el-option label="休学" :value="0" />
+                    <el-option label="毕业" :value="2" />
+                    <el-option label="退学" :value="3" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <!-- 高级搜索区域（可展开/收起） -->
+            <el-collapse-transition>
+              <div v-show="showAdvancedSearch">
+                <el-divider content-position="left">
+                  <span style="color: #909399; font-size: 14px;">高级搜索</span>
+                </el-divider>
+                <el-row :gutter="20">
+                  <el-col :span="6">
+                    <el-form-item label="专业">
+                      <el-input
+                        v-model="searchForm.major"
+                        placeholder="请输入专业"
+                        clearable
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-form-item label="性别">
+                      <el-select
+                        v-model="searchForm.gender"
+                        placeholder="请选择性别"
+                        clearable
+                        style="width: 100%"
+                      >
+                        <el-option label="男" :value="1" />
+                        <el-option label="女" :value="0" />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-form-item label="班级">
+                      <el-input
+                        v-model="searchForm.className"
+                        placeholder="请输入班级"
+                        clearable
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-form-item label="年级">
+                      <el-input
+                        v-model="searchForm.grade"
+                        placeholder="请输入年级"
+                        clearable
+                      />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-collapse-transition>
+
+            <!-- 操作按钮 -->
+            <el-row style="margin-top: 20px;">
+              <el-col :span="24" style="text-align: right;">
+                <el-button type="primary" @click="handleSearch" :loading="loading">
+                  <el-icon><Search /></el-icon>
+                  搜索
+                </el-button>
+                <el-button @click="handleReset">
+                  <el-icon><RefreshRight /></el-icon>
+                  重置
+                </el-button>
+                <el-button
+                  type="text"
+                  @click="toggleAdvancedSearch"
+                  style="margin-left: 8px; color: #409EFF;"
+                >
+                  {{ showAdvancedSearch ? '收起' : '展开' }}
+                  <el-icon style="margin-left: 4px;">
+                    <ArrowUp v-if="showAdvancedSearch" />
+                    <ArrowDown v-else />
+                  </el-icon>
+                </el-button>
+              </el-col>
+            </el-row>
           </el-form>
         </el-card>
       </div>
@@ -403,7 +442,9 @@ import {
   Search,
   RefreshRight,
   Edit,
-  View
+  View,
+  ArrowUp,
+  ArrowDown
 } from '@element-plus/icons-vue'
 import { useErrorHandler } from '@/utils/error-handler'
 import {
@@ -418,6 +459,7 @@ import type { Student, StudentForm } from '@/api/student'
 // 数据定义
 const loading = ref(false)
 const submitLoading = ref(false)
+const showAdvancedSearch = ref(false)
 const tableData = ref<Student[]>([])
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -599,6 +641,11 @@ const handleReset = () => {
   handleSearch()
 }
 
+// 切换高级搜索展开/收起
+const toggleAdvancedSearch = () => {
+  showAdvancedSearch.value = !showAdvancedSearch.value
+}
+
 const handleCurrentChange = (current: number) => {
   pagination.current = current
   loadData()
@@ -756,6 +803,88 @@ onMounted(() => {
 .student-management {
   padding: 24px;
   min-height: calc(100vh - 84px);
+  background: #f5f7fa;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.page-title h2 {
+  display: flex;
+  align-items: center;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.page-title h2 .el-icon {
+  margin-right: 12px;
+  font-size: 28px;
+}
+
+.page-title p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.content-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-section .el-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: none;
+}
+
+.search-section .el-form {
+  padding: 8px 0;
+}
+
+.search-section .el-row {
+  margin-bottom: 16px;
+}
+
+.search-section .el-row:last-child {
+  margin-bottom: 0;
+}
+
+.search-section .el-divider {
+  margin: 16px 0;
+}
+
+.advanced-search-toggle {
+  color: #409EFF;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.advanced-search-toggle:hover {
+  color: #66b1ff;
+}
+
+.table-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .page-header {
@@ -799,6 +928,43 @@ onMounted(() => {
 .search-section {
   padding: 20px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.search-section .el-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: none;
+}
+
+.search-section .el-form {
+  padding: 8px 0;
+}
+
+.search-section .el-row {
+  margin-bottom: 16px;
+}
+
+.search-section .el-row:last-child {
+  margin-bottom: 0;
+}
+
+.search-section .el-divider {
+  margin: 16px 0;
+}
+
+.advanced-search-toggle {
+  color: #409EFF;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.advanced-search-toggle:hover {
+  color: #66b1ff;
+}
+
+.table-section {
+  padding: 20px;
 }
 
 .search-form {

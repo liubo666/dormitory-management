@@ -38,7 +38,7 @@ public class DormitoryController {
     @Operation(summary = "根据ID获取宿舍详情")
     @GetMapping("/{id}")
     public Result<DormitoryVO> getDormitoryById(
-            @Parameter(description = "宿舍ID") @PathVariable String id) {
+            @Parameter(description = "宿舍ID") @PathVariable Long id) {
 
         DormitoryVO dormitory = dormitoryService.getDormitoryById(id);
         if (dormitory == null) {
@@ -50,7 +50,7 @@ public class DormitoryController {
     @Operation(summary = "获取可用宿舍列表")
     @GetMapping("/available")
     public Result<List<DormitoryVO>> getAvailableDormitories(
-            @Parameter(description = "楼栋ID") @RequestParam(required = false) String buildingId) {
+            @Parameter(description = "楼栋ID") @RequestParam(required = false) Long buildingId) {
 
         List<DormitoryVO> dormitories = dormitoryService.getAvailableDormitories(buildingId);
         return Result.success(dormitories);
@@ -95,7 +95,7 @@ public class DormitoryController {
     @Operation(summary = "删除宿舍")
     @DeleteMapping("/{id}")
     public Result<Void> deleteDormitory(
-            @Parameter(description = "宿舍ID") @PathVariable String id) {
+            @Parameter(description = "宿舍ID") @PathVariable Long id) {
 
         try {
             boolean success = dormitoryService.deleteDormitory(id);

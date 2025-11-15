@@ -31,7 +31,7 @@ public interface StudentService extends IService<Student> {
      * @param id 学生ID
      * @return 学生详情
      */
-    StudentVO getStudentById(String id);
+    StudentVO getStudentById(Long id);
 
     /**
      * 根据学号获取学生信息
@@ -65,7 +65,7 @@ public interface StudentService extends IService<Student> {
      * @param id 学生ID
      * @return 是否成功
      */
-    boolean deleteStudent(String id);
+    boolean deleteStudent(Long id);
 
     /**
      * 修改学生状态
@@ -96,7 +96,7 @@ public interface StudentService extends IService<Student> {
      * @param updateBy 操作人
      * @return 是否成功
      */
-    boolean changeDormitory(String studentId, String newDormitoryId, String newBedNo, String reason, String updateBy);
+    boolean changeDormitory(Long studentId, Long newDormitoryId, String newBedNo, String reason, String updateBy);
 
     /**
      * 退宿处理
@@ -106,7 +106,7 @@ public interface StudentService extends IService<Student> {
      * @param updateBy 操作人
      * @return 是否成功
      */
-    boolean checkoutDormitory(String studentId, String reason, String updateBy);
+    boolean checkoutDormitory(Long studentId, String reason, String updateBy);
 
     /**
      * 根据宿舍ID获取学生列表
@@ -114,7 +114,7 @@ public interface StudentService extends IService<Student> {
      * @param dormitoryId 宿舍ID
      * @return 学生列表
      */
-    List<StudentVO> getStudentsByDormitory(String dormitoryId);
+    List<StudentVO> getStudentsByDormitory(Long dormitoryId);
 
     /**
      * 获取学生统计信息
@@ -131,4 +131,12 @@ public interface StudentService extends IService<Student> {
      * @return 导入结果
      */
     Map<String, Object> batchImportStudents(List<StudentDTO> students, String createBy);
+
+    /**
+     * 获取活跃学生选项列表
+     *
+     * @param keyword 关键字（可选）
+     * @return 学生列表
+     */
+    List<StudentVO> getActiveStudents(String keyword);
 }

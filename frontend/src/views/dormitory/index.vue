@@ -6,24 +6,14 @@
           <el-icon><House /></el-icon>
           宿舍与楼栋管理
         </h2>
-        <p>管理宿舍楼和宿舍基本信息，包括楼栋、房间号、床位、入住情况等</p>
+        <p>管理宿舍与楼栋信息等</p>
       </div>
     </div>
 
     <div class="content-container">
       <!-- 宿舍管理区域 -->
       <div class="dormitory-section">
-        <div class="section-header">
-          <h3>
-            <el-icon><House /></el-icon>
-            宿舍管理
-          </h3>
-          <el-button type="primary" @click="handleAdd" size="small">
-            <el-icon><Plus /></el-icon>
-            新增宿舍
-          </el-button>
-        </div>
-
+    
         <div class="search-section">
           <el-card shadow="never">
             <el-form :model="searchForm" inline class="search-form">
@@ -72,6 +62,10 @@
                 <el-button @click="handleReset">
                   <el-icon><RefreshRight /></el-icon>
                   重置
+                </el-button>
+                <el-button type="success" @click="handleAdd">
+                  <el-icon><Plus /></el-icon>
+                  新增宿舍
                 </el-button>
               </el-form-item>
             </el-form>

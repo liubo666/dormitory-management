@@ -106,7 +106,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     }
 
     @Override
-    public StudentVO getStudentById(String id) {
+    public StudentVO getStudentById(Long id) {
         Student student = this.getById(id);
         if (student == null) {
             return null;
@@ -169,7 +169,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteStudent(String id) {
+    public boolean deleteStudent(Long id) {
         Student student = this.getById(id);
         if (student == null) {
             throw new RuntimeException("学生不存在");
@@ -274,7 +274,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean changeDormitory(String studentId, String newDormitoryId, String newBedNo, String reason, String updateBy) {
+    public boolean changeDormitory(Long studentId, Long newDormitoryId, String newBedNo, String reason, String updateBy) {
         // 检查学生是否存在
         Student student = this.getById(studentId);
         if (student == null) {
@@ -351,7 +351,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean checkoutDormitory(String studentId, String reason, String updateBy) {
+    public boolean checkoutDormitory(Long studentId, String reason, String updateBy) {
         // 检查学生是否存在
         Student student = this.getById(studentId);
         if (student == null) {
@@ -387,7 +387,7 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
     }
 
     @Override
-    public List<StudentVO> getStudentsByDormitory(String dormitoryId) {
+    public List<StudentVO> getStudentsByDormitory(Long dormitoryId) {
         LambdaQueryWrapper<Student> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                    .eq(Student::getDeleted, 0);
@@ -566,5 +566,29 @@ public class StudentServiceImpl extends ServiceImpl<StudentMapper, Student> impl
             default:
                 return "未知";
         }
+    }
+
+    @Override
+    public List<StudentVO> getActiveStudents(String keyword) {
+        // 构建查询条件：在校状态 + 关键字搜索
+        LambdaQueryWrapper<Student> queryWrapper = new LambdaQueryWrapper<Student>()
+                .eq(Student::getStatus, 1) // 只查询在校状态的学生
+                .eq(Student::getDeleted, 0) // 未删除
+                .orderByAsc(Student::getName)
+                .orderByAsc(Student::getStudentNo);
+
+        // 如果有关键字，添加姓名或学号搜索条件
+        if (org.springframework.util.StringUtils.hasText(keyword)) {
+            queryWrapper.and(wrapper -> wrapper
+                    .like(Student::getName, keyword)
+                    .or()
+                    .like(Student::getStudentNo, keyword));
+        }
+
+        List<Student> students = this.list(queryWrapper);
+
+        return students.stream()
+                .map(this::convertToVO)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

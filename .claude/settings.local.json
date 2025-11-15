@@ -17,7 +17,8 @@
       "Bash(mvn spring-boot:run:*)",
       "Bash(cat:*)",
       "Bash(node:*)",
-      "Bash(temp_script.ts)"
+      "Bash(temp_script.ts)",
+      "Bash(mvn compile:*)"
     ],
     "deny": [],
     "ask": []

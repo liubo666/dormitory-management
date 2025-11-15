@@ -72,7 +72,7 @@ public class DormitoryServiceImpl extends ServiceImpl<DormitoryMapper, Dormitory
     }
 
     @Override
-    public DormitoryVO getDormitoryById(String id) {
+    public DormitoryVO getDormitoryById(Long id) {
         Dormitory dormitory = this.getById(id);
         if (dormitory == null) {
             return null;
@@ -94,7 +94,7 @@ public class DormitoryServiceImpl extends ServiceImpl<DormitoryMapper, Dormitory
     }
 
     @Override
-    public List<DormitoryVO> getAvailableDormitories(String buildingId) {
+    public List<DormitoryVO> getAvailableDormitories(Long buildingId) {
         // 使用MyBatis-Plus查询可用宿舍
         LambdaQueryWrapper<Dormitory> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dormitory::getStatus, 1)
@@ -162,7 +162,7 @@ public class DormitoryServiceImpl extends ServiceImpl<DormitoryMapper, Dormitory
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteDormitory(String id) {
+    public boolean deleteDormitory(Long id) {
         Dormitory dormitory = this.getById(id);
         if (dormitory == null) {
             throw new RuntimeException("宿舍不存在");
@@ -256,5 +256,18 @@ public class DormitoryServiceImpl extends ServiceImpl<DormitoryMapper, Dormitory
             default:
                 return "未知";
         }
+    }
+
+    @Override
+    public List<DormitoryVO> getAllDormitories() {
+        // 查询所有未删除的宿舍
+        List<Dormitory> dormitories = this.list(new LambdaQueryWrapper<Dormitory>()
+                .eq(Dormitory::getDeleted, 0)
+                .orderByAsc(Dormitory::getBuildingName)
+                .orderByAsc(Dormitory::getRoomNo));
+
+        return dormitories.stream()
+                .map(this::convertToVO)
+                .collect(java.util.stream.Collectors.toList());
     }
 }
