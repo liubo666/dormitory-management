@@ -57,6 +57,7 @@ public interface VisitorService {
      */
     boolean checkOut(Long id);
 
+
     /**
      * 取消访问（状态改为已取消）
      */
