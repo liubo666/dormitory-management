@@ -7,16 +7,13 @@ spring:
   application:
     name: dormitory-management
 
-  # ❌ 重要：删除这一行，不能在 profile-specific 文件中定义
-  # profiles:
-  #   active: prod
 
   # 数据源配置 - 生产环境
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: root
+    password: Root123!
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
