@@ -1,76 +1,76 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /api
-
-spring:
-  application:
-    name: dormitory-management
-
-
-  # 数据源配置 - 生产环境
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: root
-    password: Root123!
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
-
-  # Redis 配置 - 生产环境
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      database: 0
-      timeout: 10000ms
-      lettuce:
-        pool:
-          max-active: 20
-          max-wait: -1ms
-          max-idle: 10
-          min-idle: 5
-
-  # Jackson 配置
-  jackson:
-    time-zone: GMT+8
-    date-format: yyyy-MM-dd HH:mm:ss
-
-# JWT 配置 - 生产环境
-jwt:
-  secret: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4
-  expiration: 28800
-
-# 日志配置 - 生产环境
-logging:
-  level:
-    com.dormitory: INFO
-    root: INFO
-  file:
-    name: /opt/apps/dormitory-management/logs/application.log
-    max-size: 100MB
-    max-history: 30
-
-# MyBatis Plus 配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-  global-config:
-    db-config:
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-
-# 管理端点配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
+#server:
+#  port: 8080
+#  servlet:
+#    context-path: /api
+#
+#spring:
+#  application:
+#    name: dormitory-management
+#
+#
+#  # 数据源配置 - 生产环境
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+#    username: root
+#    password: Root123!
+#    hikari:
+#      maximum-pool-size: 20
+#      minimum-idle: 5
+#      connection-timeout: 20000
+#      idle-timeout: 300000
+#      max-lifetime: 1200000
+#
+#  # Redis 配置 - 生产环境
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+#      database: 0
+#      timeout: 10000ms
+#      lettuce:
+#        pool:
+#          max-active: 20
+#          max-wait: -1ms
+#          max-idle: 10
+#          min-idle: 5
+#
+#  # Jackson 配置
+#  jackson:
+#    time-zone: GMT+8
+#    date-format: yyyy-MM-dd HH:mm:ss
+#
+## JWT 配置 - 生产环境
+#jwt:
+#  secret: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4
+#  expiration: 28800
+#
+## 日志配置 - 生产环境
+#logging:
+#  level:
+#    com.dormitory: INFO
+#    root: INFO
+#  file:
+#    name: /opt/apps/dormitory-management/logs/application.log
+#    max-size: 100MB
+#    max-history: 30
+#
+## MyBatis Plus 配置
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: true
+#  global-config:
+#    db-config:
+#      logic-delete-field: deleted
+#      logic-delete-value: 1
+#      logic-not-delete-value: 0
+#
+## 管理端点配置
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,metrics
+#  endpoint:
+#    health:
+#      show-details: always

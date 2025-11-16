@@ -66,7 +66,9 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/webjars/**",
                     "/favicon.ico",
-                    "/error"
+                    "/error",
+                    "/actuator/health",
+                    "/actuator/info"
                 ).permitAll()
 
                 // 其他所有请求都需要有效的Token（JWT过滤器会验证）
