@@ -6,84 +6,74 @@ server:
 spring:
   application:
     name: dormitory-management
-  profiles:
-    active: prod
 
-  # 生产环境数据源配置
+  # ❌ 重要：删除这一行，不能在 profile-specific 文件中定义
+  # profiles:
+  #   active: prod
+
+  # 数据源配置 - 生产环境
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # 使用环境变量配置生产数据库
-    url: ${DB_URL:jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
 
-  # 生产环境Redis配置
+  # Redis 配置 - 生产环境
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      database: ${REDIS_DATABASE:0}
+      host: localhost
+      port: 6379
+      database: 0
       timeout: 10000ms
       lettuce:
         pool:
-          max-active: 8
+          max-active: 20
           max-wait: -1ms
-          max-idle: 8
-          min-idle: 0
+          max-idle: 10
+          min-idle: 5
 
-# MyBatis Plus配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    cache-enabled: false
-    call-setters-on-nulls: true
-    jdbc-type-for-null: 'null'
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl  # 生产环境使用slf4j
-  global-config:
-    db-config:
-      id-type: ASSIGN_ID
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      update-strategy: NOT_NULL
-  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  # Jackson 配置
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
 
-# JWT配置 - 生产环境
+# JWT 配置 - 生产环境
 jwt:
-  secret: ${JWT_SECRET:prodSecretKey123456789012345678901234567890}
-  expiration: 28800      # 访问令牌过期时间（秒）= 8小时
-  refresh-expiration: 604800  # 刷新令牌过期时间（秒）= 7天
-
-# Knife4j配置 - 生产环境
-knife4j:
-  enable: false  # 生产环境关闭文档
-  production: true
-  cors: false
-  basic:
-    enable: true
-    username: ${KNIFE4J_USERNAME:admin}
-    password: ${KNIFE4J_PASSWORD:admin123}
+  secret: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4
+  expiration: 28800
 
 # 日志配置 - 生产环境
 logging:
   level:
-    com.dormitory.management: info
-    root: warn
-    org.springframework.security: warn
-    org.springframework.web: warn
+    com.dormitory: INFO
+    root: INFO
   file:
-    name: ${LOG_PATH:/var/log/dormitory-management}/application.log
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    name: /opt/apps/dormitory-management/logs/application.log
+    max-size: 100MB
+    max-history: 30
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
 
 # 管理端点配置
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
       show-details: when-authorized
