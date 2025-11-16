@@ -547,8 +547,13 @@ const loadData = async () => {
     }
 
     const response = await getRepairPage(params)
-    tableData.value = response.records
-    pagination.total = response.total
+    if (response && typeof response === 'object') {
+      tableData.value = (response as any).records || []
+      pagination.total = (response as any).total || 0
+    } else {
+      tableData.value = []
+      pagination.total = 0
+    }
   } catch (error) {
     ElMessage.error('获取数据失败')
     console.error(error)
@@ -596,17 +601,21 @@ const openAddDialog = async () => {
   try {
     // 加载宿舍选项
     const dormitories = await getDormitoryOptions()
-    roomOptions.value = dormitories.map((dorm: any) => ({
-      label: `${dorm.buildingName} ${dorm.roomNo}`,
-      value: dorm.id
-    }))
+    if (Array.isArray(dormitories)) {
+      roomOptions.value = dormitories.map((dorm: any) => ({
+        label: `${dorm.buildingName} ${dorm.roomNo}`,
+        value: dorm.id
+      }))
+    }
 
     // 加载学生选项
     const students = await getStudentOptions()
-    studentOptions.value = students.map((student: any) => ({
-      label: `${student.name} (${student.studentNo})`,
-      value: student.id
-    }))
+    if (Array.isArray(students)) {
+      studentOptions.value = students.map((student: any) => ({
+        label: `${student.name} (${student.studentNo})`,
+        value: student.id
+      }))
+    }
 
     showAddDialog.value = true
   } catch (error: any) {

@@ -182,7 +182,9 @@ const fetchStatistics = async () => {
   try {
     loading.value = true
     const response = await getOverallStatistics()
-    statistics.value = response // response已经是data，不需要再取.data
+    if (response) {
+      statistics.value = response as any
+    }
   } catch (error) {
     console.error('获取统计数据失败:', error)
   } finally {

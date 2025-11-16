@@ -3,7 +3,7 @@
     <el-header class="layout-header">
       <div class="header-left">
         <h2 class="logo">
-          <el-icon color="#1e40af" style="margin-right: 8px;"><School /></el-icon>
+          <img src="/logo-placeholder.svg" alt="宿舍管理系统" width="24" height="24" style="margin-right: 8px;" />
           宿舍管理系统
         </h2>
       </div>

@@ -23,47 +23,37 @@
 
     <!-- 统计卡片 -->
     <div class="stats-container">
-      <el-row :gutter="24">
-        <el-col :span="8">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon applying">
-                <el-icon><Document /></el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-number">{{ statistics.applyingCount }}</div>
-                <div class="stats-label">申请中</div>
-              </div>
+      <el-card shadow="never" class="stats-wrapper">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stats-icon applying">
+              <el-icon><Document /></el-icon>
             </div>
-          </el-card>
-        </el-col>
-        <el-col :span="8">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon checked-in">
-                <el-icon><UserFilled /></el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-number">{{ statistics.checkedInCount }}</div>
-                <div class="stats-label">已入住</div>
-              </div>
+            <div class="stats-info">
+              <div class="stats-number">{{ statistics.applyingCount }}</div>
+              <div class="stats-label">申请中</div>
             </div>
-          </el-card>
-        </el-col>
-        <el-col :span="8">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon rejected">
-                <el-icon><Close /></el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-number">{{ statistics.rejectedCount }}</div>
-                <div class="stats-label">已拒绝</div>
-              </div>
+          </div>
+          <div class="stat-card">
+            <div class="stats-icon checked-in">
+              <el-icon><UserFilled /></el-icon>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+            <div class="stats-info">
+              <div class="stats-number">{{ statistics.checkedInCount }}</div>
+              <div class="stats-label">已入住</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stats-icon rejected">
+              <el-icon><Close /></el-icon>
+            </div>
+            <div class="stats-info">
+              <div class="stats-number">{{ statistics.rejectedCount }}</div>
+              <div class="stats-label">已拒绝</div>
+            </div>
+          </div>
+        </div>
+      </el-card>
     </div>
 
     <!-- 搜索表单 -->
@@ -471,7 +461,7 @@
         <el-descriptions-item label="预计退宿日期">{{ currentRecord?.expectedCheckoutDate || '未设置' }}</el-descriptions-item>
         <el-descriptions-item label="实际退宿日期">{{ currentRecord?.actualCheckoutDate || '未退宿' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="getStatusType(currentRecord?.status)">
+          <el-tag :type="getStatusType(currentRecord?.status || 0)">
             {{ currentRecord?.statusText }}
           </el-tag>
         </el-descriptions-item>
@@ -1156,36 +1146,47 @@ onMounted(() => {
 }
 
 .stats-container {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
-.stats-card {
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.stats-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.stats-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 0;
 }
 
-.stats-content {
+.stat-card {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 12px 14px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 72px;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stats-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20px;
-  font-size: 32px;
+  margin-right: 10px;
+  font-size: 16px;
   color: white;
   flex-shrink: 0;
 }
@@ -1208,20 +1209,25 @@ onMounted(() => {
 
 .stats-info {
   flex: 1;
+  min-width: 0;
 }
 
 .stats-number {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #1e293b;
   line-height: 1.2;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stats-label {
-  font-size: 16px;
+  font-size: 11px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .search-container {
@@ -1322,8 +1328,27 @@ onMounted(() => {
 }
 
 @media (max-width: 1200px) {
-  .stats-container .el-col {
-    margin-bottom: 16px;
+  .stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 10px 12px;
+    min-height: 68px;
+  }
+
+  .stats-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .stats-number {
+    font-size: 18px;
+  }
+
+  .stats-label {
+    font-size: 10px;
   }
 }
 
@@ -1340,6 +1365,31 @@ onMounted(() => {
   .page-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px 12px;
+    min-height: 64px;
+  }
+
+  .stats-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    margin-right: 8px;
+  }
+
+  .stats-number {
+    font-size: 16px;
+  }
+
+  .stats-label {
+    font-size: 10px;
   }
 
   .table-header {

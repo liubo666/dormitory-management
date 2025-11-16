@@ -18,7 +18,14 @@
       "Bash(cat:*)",
       "Bash(node:*)",
       "Bash(temp_script.ts)",
-      "Bash(mvn compile:*)"
+      "Bash(mvn compile:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run build-only:*)",
+      "Bash(mvn:*)",
+      "Bash(dir:*)",
+      "Bash(python:*)",
+      "Bash(build-for-edgeone.bat:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []

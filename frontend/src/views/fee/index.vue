@@ -18,7 +18,7 @@
 
     <!-- 统计信息 -->
     <div class="statistics-section">
-      <el-card shadow="never">
+      <el-card shadow="never" class="statistics-card">
         <div class="statistics-cards">
           <div class="stat-card">
             <div class="stat-icon total">
@@ -378,7 +378,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import {
   Money,
   Plus,
@@ -519,9 +520,9 @@ const loadData = async () => {
     const response = await getFeePage(params)
     console.log('费用管理 - API返回数据:', response)
 
-    if (response && response.records) {
-      tableData.value = response.records
-      pagination.total = response.total || 0
+    if (response && typeof response === 'object' && 'records' in response) {
+      tableData.value = (response as any).records
+      pagination.total = (response as any).total || 0
     } else if (Array.isArray(response)) {
       tableData.value = response
       pagination.total = response.length
@@ -548,7 +549,7 @@ const loadStatistics = async () => {
     }
     const response = await getFeeStatistics(params)
     if (response) {
-      statistics.value = response
+      statistics.value = response as any
     }
   } catch (error) {
     console.error('获取统计信息失败:', error)
@@ -602,45 +603,45 @@ const handleEdit = async (row: FeeItem) => {
 
     console.log('费用管理 - 获取到的费用详情:', feeDetails)
 
-    if (feeDetails) {
+    if (feeDetails && typeof feeDetails === 'object') {
       // 手动映射每个字段，确保数据类型正确
-      form.feeType = feeDetails.feeType
-      form.feeName = feeDetails.feeName || ''
-      form.description = feeDetails.description || ''
-      form.amount = feeDetails.amount
-      form.billingCycle = feeDetails.billingCycle
-      form.studentId = feeDetails.studentId
-      form.studentName = feeDetails.studentName || ''
-      form.studentNo = feeDetails.studentNo || ''
-      form.roomId = feeDetails.roomId
-      form.roomNo = feeDetails.roomNo || ''
-      form.buildingId = feeDetails.roomId // 使用roomId作为buildingId
-      form.buildingName = feeDetails.buildingName || ''
-      form.startTime = feeDetails.startTime || ''
-      form.endTime = feeDetails.endTime || ''
-      form.dueDate = feeDetails.dueDate || ''
-      form.remark = feeDetails.remark || ''
+      form.feeType = (feeDetails as any).feeType
+      form.feeName = (feeDetails as any).feeName || ''
+      form.description = (feeDetails as any).description || ''
+      form.amount = (feeDetails as any).amount
+      form.billingCycle = (feeDetails as any).billingCycle
+      form.studentId = (feeDetails as any).studentId
+      form.studentName = (feeDetails as any).studentName || ''
+      form.studentNo = (feeDetails as any).studentNo || ''
+      form.roomId = (feeDetails as any).roomId
+      form.roomNo = (feeDetails as any).roomNo || ''
+      form.buildingId = (feeDetails as any).roomId // 使用roomId作为buildingId
+      form.buildingName = (feeDetails as any).buildingName || ''
+      form.startTime = (feeDetails as any).startTime || ''
+      form.endTime = (feeDetails as any).endTime || ''
+      form.dueDate = (feeDetails as any).dueDate || ''
+      form.remark = (feeDetails as any).remark || ''
 
       // 设置日期范围
-      if (feeDetails.startTime && feeDetails.endTime) {
-        feeDateRange.value = [feeDetails.startTime, feeDetails.endTime]
+      if ((feeDetails as any).startTime && (feeDetails as any).endTime) {
+        feeDateRange.value = [(feeDetails as any).startTime, (feeDetails as any).endTime]
         console.log('设置日期范围:', feeDateRange.value)
       }
 
       // 设置学生选项
-      if (feeDetails.studentId && feeDetails.studentName && feeDetails.studentNo) {
+      if ((feeDetails as any).studentId && (feeDetails as any).studentName && (feeDetails as any).studentNo) {
         studentOptions.value = [{
-          label: `${feeDetails.studentNo} - ${feeDetails.studentName}`,
-          value: feeDetails.studentId
+          label: `${(feeDetails as any).studentNo} - ${(feeDetails as any).studentName}`,
+          value: (feeDetails as any).studentId
         }]
         console.log('设置学生选项:', studentOptions.value)
       }
 
       // 设置宿舍选项
-      if (feeDetails.roomId && (feeDetails.buildingName || feeDetails.roomNo)) {
+      if ((feeDetails as any).roomId && ((feeDetails as any).buildingName || (feeDetails as any).roomNo)) {
         dormitoryOptions.value = [{
-          label: `${feeDetails.buildingName || ''} ${feeDetails.roomNo || ''}`.trim(),
-          value: feeDetails.roomId
+          label: `${(feeDetails as any).buildingName || ''} ${(feeDetails as any).roomNo || ''}`.trim(),
+          value: (feeDetails as any).roomId
         }]
         console.log('设置宿舍选项:', dormitoryOptions.value)
       }
@@ -760,8 +761,8 @@ const handleStudentSearch = async (query: string) => {
 
     console.log('费用管理 - 学生搜索结果:', response)
 
-    if (response && response.records) {
-      studentOptions.value = response.records.map((student: any) => ({
+    if (response && typeof response === 'object' && 'records' in response) {
+      studentOptions.value = (response as any).records.map((student: any) => ({
         label: `${student.studentNo} - ${student.name}`,
         value: student.id
       }))
@@ -793,8 +794,8 @@ const handleDormitorySearch = async (query: string) => {
 
     console.log('费用管理 - 宿舍搜索结果:', response)
 
-    if (response && response.records) {
-      dormitoryOptions.value = response.records.map((dormitory: any) => ({
+    if (response && typeof response === 'object' && 'records' in response) {
+      dormitoryOptions.value = (response as any).records.map((dormitory: any) => ({
         label: `${dormitory.buildingName} ${dormitory.roomNo}`,
         value: dormitory.id
       }))
@@ -937,38 +938,46 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
+.statistics-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .statistics-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 0;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 14px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 80px;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 8px;
   margin-right: 12px;
-  font-size: 20px;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 .stat-icon.total {
@@ -989,19 +998,24 @@ onMounted(() => {
 
 .stat-content {
   flex: 1;
+  min-width: 0;
 }
 
 .stat-value {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 3px;
-  line-height: 1;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.9;
-  font-weight: 500;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .content-container {
@@ -1113,8 +1127,8 @@ onMounted(() => {
   }
 
   .statistics-cards {
-    grid-template-columns: 1fr;
-    padding: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .search-form {
@@ -1147,7 +1161,27 @@ onMounted(() => {
 
 @media (max-width: 1024px) {
   .statistics-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+    min-height: 75px;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 10px;
   }
 }
 </style>

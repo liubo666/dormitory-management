@@ -14,6 +14,14 @@ export interface ApiResponse<T = any> {
   data: T
 }
 
+// 分页响应数据格式
+export interface PageResponse<T = any> {
+  records: T[]
+  total: number
+  current: number
+  size: number
+}
+
 // 创建axios实例
 const service: AxiosInstanceType = axios.create({
   baseURL: '/api',

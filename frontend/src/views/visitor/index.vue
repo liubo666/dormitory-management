@@ -349,8 +349,8 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="预计访问时间">{{ formatDate(currentRecord.expectedVisitTime) }}</el-descriptions-item>
-        <el-descriptions-item label="实际到达时间">{{ formatDate(currentRecord.actualArrivalTime) || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="离开时间">{{ formatDate(currentRecord.leaveTime) || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="实际到达时间">{{ formatDate(currentRecord.actualArrivalTime || '') || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="离开时间">{{ formatDate(currentRecord.leaveTime || '') || '无' }}</el-descriptions-item>
         <el-descriptions-item label="登记人">{{ currentRecord.registrarName || '无' }}</el-descriptions-item>
         <el-descriptions-item label="访问事由" span="2">{{ currentRecord.visitPurpose || '无' }}</el-descriptions-item>
         <el-descriptions-item label="备注" span="2">{{ currentRecord.remarks || '无' }}</el-descriptions-item>
@@ -493,8 +493,13 @@ const loadData = async () => {
     }
 
     const response = await getVisitorPage(params)
-    tableData.value = response.records
-    pagination.total = response.total
+    if (response && typeof response === 'object') {
+      tableData.value = (response as any).records || []
+      pagination.total = (response as any).total || 0
+    } else {
+      tableData.value = []
+      pagination.total = 0
+    }
   } catch (error: any) {
     ElMessage.error('获取数据失败')
     console.error(error)
@@ -507,10 +512,12 @@ const loadData = async () => {
 const loadDormitoryOptions = async () => {
   try {
     const response = await getDormitoryOptions()
-    dormitoryOptions.value = response.map((item: any) => ({
-      label: item.label,
-      value: item.value
-    }))
+    if (Array.isArray(response)) {
+      dormitoryOptions.value = response.map((item: any) => ({
+        label: item.label,
+        value: item.value
+      }))
+    }
   } catch (error) {
     console.error('获取宿舍选项失败:', error)
   }
@@ -533,8 +540,8 @@ const handleDormitorySearch = async (query: string) => {
     let dormitories = []
 
     // 尝试多种可能的数据结构
-    if (response && response.records) {
-      dormitories = response.records
+    if (response && typeof response === 'object' && 'records' in response) {
+      dormitories = (response as any).records
     } else if (Array.isArray(response)) {
       dormitories = response
     } else if (response && Array.isArray(response.data)) {

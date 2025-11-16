@@ -1,0 +1,6 @@
+<!-- 这是一个占位符，实际部署时需要替换为真实的192x192 PNG文件 -->
+<!-- 可以使用以下方法创建真实的PNG文件：
+1. 使用在线工具将logo-placeholder.svg转换为192x192 PNG
+2. 使用设计软件创建192x192的Logo
+3. 使用命令行工具：inkscape logo-placeholder.svg --export-png=logo-192.png -w 192 -h 192
+-->

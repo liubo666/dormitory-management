@@ -417,8 +417,13 @@ const loadData = async () => {
     }
 
     const response = await getInspectionPage(params)
-    tableData.value = response.records
-    pagination.total = response.total
+    if (response && typeof response === 'object') {
+      tableData.value = (response as any).records || []
+      pagination.total = (response as any).total || 0
+    } else {
+      tableData.value = []
+      pagination.total = 0
+    }
   } catch (error: any) {
     ElMessage.error('获取数据失败')
     console.error(error)
@@ -431,10 +436,14 @@ const loadData = async () => {
 const loadDormitoryOptions = async () => {
   try {
     const response = await getDormitoryOptions()
-    dormitoryOptions.value = response.map((item: any) => ({
-      label: `${item.buildingName || ''} ${item.roomNo}`,
-      value: item.id
-    }))
+    if (Array.isArray(response)) {
+      dormitoryOptions.value = response.map((item: any) => ({
+        label: `${item.buildingName || ''} ${item.roomNo}`,
+        value: item.id
+      }))
+    } else {
+      dormitoryOptions.value = []
+    }
   } catch (error) {
     console.error('获取宿舍选项失败:', error)
   }
@@ -496,16 +505,18 @@ const handleEdit = async (row: Inspection) => {
   isEdit.value = true
   try {
     const detail = await getInspectionById(row.id)
-    Object.assign(form, {
-      id: detail.id,
-      roomId: detail.roomId,
-      inspectionDate: detail.inspectionDate,
-      score: detail.score,
-      level: detail.level,
-      remarks: detail.remarks || '',
-      issues: detail.issues || '',
-      images: detail.imageList || []
-    })
+    if (detail && typeof detail === 'object') {
+      Object.assign(form, {
+        id: (detail as any).id,
+        roomId: (detail as any).roomId,
+        inspectionDate: (detail as any).inspectionDate,
+        score: (detail as any).score,
+        level: (detail as any).level,
+        remarks: (detail as any).remarks || '',
+        issues: (detail as any).issues || '',
+        images: (detail as any).imageList || []
+      })
+    }
     showDialog.value = true
   } catch (error: any) {
     ElMessage.error('获取详情失败')

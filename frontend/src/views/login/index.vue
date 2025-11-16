@@ -3,9 +3,7 @@
     <div class="login-form">
       <div class="login-header">
         <div class="school-logo">
-          <el-icon size="48" color="#1e40af">
-            <School />
-          </el-icon>
+          <img src="/logo-placeholder.svg" alt="宿舍管理系统" width="48" height="48" />
         </div>
         <h1>宿舍管理系统</h1>
         <p>Dormitory Management System</p>
