@@ -25,7 +25,12 @@
       "Bash(dir:*)",
       "Bash(python:*)",
       "Bash(build-for-edgeone.bat:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(chmod:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker compose:*)"
     ],
     "deny": [],
     "ask": []
