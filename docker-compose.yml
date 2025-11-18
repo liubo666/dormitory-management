@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: dormitory-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Root123!
+      MYSQL_DATABASE: dormitory_management
+      MYSQL_USER: dormitory
+      MYSQL_PASSWORD: Dormitory123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - /home/liubo/prod/dormitory-management/mysql/init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - dormitory-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: dormitory-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - dormitory-network
+
+  # 后端Spring Boot应用
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dormitory-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: dormitory
+      SPRING_DATASOURCE_PASSWORD: Dormitory123!
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    volumes:
+      - /home/liubo/prod/dormitory-management/backend/logs:/opt/apps/dormitory-management/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - dormitory-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # 前端Vue应用
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dormitory-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - /home/liubo/prod/dormitory-management/frontend/logs:/var/log/nginx
+    depends_on:
+      - backend
+    networks:
+      - dormitory-network
+
+# 数据卷
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# 网络
+networks:
+  dormitory-network:
+    driver: bridge
