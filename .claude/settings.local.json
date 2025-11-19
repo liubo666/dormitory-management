@@ -30,7 +30,9 @@
       "Bash(scp:*)",
       "Bash(chmod:*)",
       "Bash(docker-compose ps:*)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
