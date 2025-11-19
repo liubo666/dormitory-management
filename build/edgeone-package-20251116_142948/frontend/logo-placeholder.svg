@@ -1,5 +1,0 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="128" height="128" rx="16" fill="#1e40af"/>
-  <path d="M64 24C56.268 24 49 28.732 49 36.5V48H38C31.3726 48 26 53.3726 26 60V88C26 94.6274 31.3726 100 38 100H90C96.6274 100 102 94.6274 102 88V60C102 53.3726 96.6274 48 90 48H79V36.5C79 28.732 71.732 24 64 24ZM57 36.5C57 33.4624 59.4624 31 62.5 31H65.5C68.5376 31 71 33.4624 71 36.5V48H57V36.5ZM64 68C67.3137 68 70 70.6863 70 74C70 77.3137 67.3137 80 64 80C60.6863 80 58 77.3137 58 74C58 70.6863 60.6863 68 64 68Z" fill="white"/>
-  <text x="64" y="115" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">宿舍管理</text>
-</svg>
