@@ -1,8 +1,6 @@
 # Maven
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !target/maven-archiver/pom.properties
-!.mvn/wrapper/maven-wrapper.properties
 
 # IDE
 .idea/
