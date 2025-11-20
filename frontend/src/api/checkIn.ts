@@ -1,4 +1,4 @@
-import { request } from '@/utils/request'
+import request from '@/utils/request'
 
 // 入住分配分页查询参数
 export interface CheckInParams {

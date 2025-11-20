@@ -186,7 +186,7 @@ const fetchStatistics = async () => {
       statistics.value = response as any
     }
   } catch (error) {
-    console.error('获取统计数据失败:', error)
+    // 获取统计数据失败
   } finally {
     loading.value = false
   }

@@ -518,7 +518,6 @@ const loadData = async () => {
     }
 
     const response = await getFeePage(params)
-    console.log('费用管理 - API返回数据:', response)
 
     if (response && typeof response === 'object' && 'records' in response) {
       tableData.value = (response as any).records
@@ -531,7 +530,6 @@ const loadData = async () => {
       pagination.total = 0
     }
   } catch (error) {
-    console.error('获取费用列表失败:', error)
     ElMessage.error('获取费用列表失败')
     tableData.value = []
     pagination.total = 0
@@ -552,7 +550,7 @@ const loadStatistics = async () => {
       statistics.value = response as any
     }
   } catch (error) {
-    console.error('获取统计信息失败:', error)
+    // 获取统计信息失败
   }
 }
 
@@ -601,8 +599,7 @@ const handleEdit = async (row: FeeItem) => {
     // 调用getFeeById获取完整的费用信息
     const feeDetails = await getFeeById(row.id)
 
-    console.log('费用管理 - 获取到的费用详情:', feeDetails)
-
+    
     if (feeDetails && typeof feeDetails === 'object') {
       // 手动映射每个字段，确保数据类型正确
       form.feeType = (feeDetails as any).feeType
@@ -625,7 +622,6 @@ const handleEdit = async (row: FeeItem) => {
       // 设置日期范围
       if ((feeDetails as any).startTime && (feeDetails as any).endTime) {
         feeDateRange.value = [(feeDetails as any).startTime, (feeDetails as any).endTime]
-        console.log('设置日期范围:', feeDateRange.value)
       }
 
       // 设置学生选项
@@ -634,7 +630,6 @@ const handleEdit = async (row: FeeItem) => {
           label: `${(feeDetails as any).studentNo} - ${(feeDetails as any).studentName}`,
           value: (feeDetails as any).studentId
         }]
-        console.log('设置学生选项:', studentOptions.value)
       }
 
       // 设置宿舍选项
@@ -643,15 +638,11 @@ const handleEdit = async (row: FeeItem) => {
           label: `${(feeDetails as any).buildingName || ''} ${(feeDetails as any).roomNo || ''}`.trim(),
           value: (feeDetails as any).roomId
         }]
-        console.log('设置宿舍选项:', dormitoryOptions.value)
       }
-
-      console.log('最终表单数据:', form)
     }
 
     dialogVisible.value = true
   } catch (error) {
-    console.error('获取费用详情失败:', error)
     ElMessage.error('获取费用详情失败')
   } finally {
     loading.value = false
@@ -696,7 +687,6 @@ const handlePay = async (row: FeeItem) => {
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('支付失败:', error)
       ElMessage.error('支付失败')
     }
   }
@@ -722,7 +712,6 @@ const handleDelete = async (row: FeeItem) => {
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除失败:', error)
       ElMessage.error('删除失败')
     }
   }
@@ -759,8 +748,7 @@ const handleStudentSearch = async (query: string) => {
       size: 20
     })
 
-    console.log('费用管理 - 学生搜索结果:', response)
-
+  
     if (response && typeof response === 'object' && 'records' in response) {
       studentOptions.value = (response as any).records.map((student: any) => ({
         label: `${student.studentNo} - ${student.name}`,
@@ -775,7 +763,6 @@ const handleStudentSearch = async (query: string) => {
       studentOptions.value = []
     }
   } catch (error) {
-    console.error('搜索学生失败:', error)
     studentOptions.value = []
   } finally {
     studentLoading.value = false
@@ -792,8 +779,7 @@ const handleDormitorySearch = async (query: string) => {
       size: 20
     })
 
-    console.log('费用管理 - 宿舍搜索结果:', response)
-
+    
     if (response && typeof response === 'object' && 'records' in response) {
       dormitoryOptions.value = (response as any).records.map((dormitory: any) => ({
         label: `${dormitory.buildingName} ${dormitory.roomNo}`,
@@ -808,7 +794,6 @@ const handleDormitorySearch = async (query: string) => {
       dormitoryOptions.value = []
     }
   } catch (error) {
-    console.error('搜索宿舍失败:', error)
     dormitoryOptions.value = []
   } finally {
     dormitoryLoading.value = false
@@ -884,7 +869,6 @@ const handleSubmit = async () => {
       loadStatistics()
     }
   } catch (error) {
-    console.error('提交失败:', error)
     ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
     submitting.value = false

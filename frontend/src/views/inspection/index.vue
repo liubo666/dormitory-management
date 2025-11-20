@@ -426,7 +426,6 @@ const loadData = async () => {
     }
   } catch (error: any) {
     ElMessage.error('获取数据失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -445,7 +444,7 @@ const loadDormitoryOptions = async () => {
       dormitoryOptions.value = []
     }
   } catch (error) {
-    console.error('获取宿舍选项失败:', error)
+    // 获取宿舍选项失败
   }
 }
 

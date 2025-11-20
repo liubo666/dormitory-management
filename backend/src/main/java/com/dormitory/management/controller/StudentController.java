@@ -7,7 +7,6 @@ import com.dormitory.management.dto.StudentDTO;
 import com.dormitory.management.dto.StudentPageDTO;
 import com.dormitory.management.service.StudentService;
 import com.dormitory.management.service.DormitoryService;
-import com.dormitory.management.service.SysUserService;
 import com.dormitory.management.context.UserContext;
 import com.dormitory.management.vo.DormitoryVO;
 import com.dormitory.management.vo.StudentVO;
@@ -57,18 +56,6 @@ public class StudentController {
             return Result.error("学生不存在");
         }
         return Result.success(student);
-    }
-
-    @Operation(summary = "根据学号获取学生信息")
-    @GetMapping("/studentNo/{studentNo}")
-    public Result<StudentVO> getStudentByStudentNo(
-            @Parameter(description = "学号") @PathVariable String studentNo) {
-//         student = studentService.getStudentByStudentNo(studentNo);
-//        if (student == null) {
-//            return Result.error("学生不存在");
-//        }
-//        var studentVO = studentService.getStudentById(student.getId());
-        return Result.success(null);
     }
 
     @Operation(summary = "新增学生")
@@ -237,10 +224,6 @@ public class StudentController {
                 dormMap.put("buildingName", dorm.getBuildingName());
                 dormMap.put("roomNo", dorm.getRoomNo());
                 dormMap.put("availableBeds", dorm.getAvailableBeds());
-
-                // 获取床位详细信息
-//                Map<String, Object> bedInfo = dormitoryServicen.getDormitoryBeds(dorm.getId());
-//                dormMap.put("bedList", bedInfo.get("bedList"));
 
                 return dormMap;
             }).collect(java.util.stream.Collectors.toList());

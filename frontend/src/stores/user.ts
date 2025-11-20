@@ -49,7 +49,6 @@ export const useUserStore = defineStore('user', () => {
       await logout()
     } catch (error) {
       // 即使登出接口失败，也要清除本地数据
-      console.error('登出接口调用失败:', error)
     }
 
     // 清除本地数据

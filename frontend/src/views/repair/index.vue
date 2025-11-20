@@ -556,7 +556,6 @@ const loadData = async () => {
     }
   } catch (error) {
     ElMessage.error('获取数据失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -619,7 +618,6 @@ const openAddDialog = async () => {
 
     showAddDialog.value = true
   } catch (error: any) {
-    console.error(error)
     ElMessage.error(error.message || '加载选项失败')
   }
 }
@@ -647,7 +645,6 @@ const handleSubmitAdd = async () => {
         })
         loadData()
       } catch (error: any) {
-        console.error(error)
         ElMessage.error(error.message || '新增报修失败')
       } finally {
         submitting.value = false
@@ -680,7 +677,6 @@ const handleSubmitProcess = async () => {
         showProcessDialog.value = false
         loadData()
       } catch (error: any) {
-        console.error(error)
         ElMessage.error(error.message || '处理报修失败')
       } finally {
         submitting.value = false
@@ -701,7 +697,6 @@ const handleDelete = (row: Repair) => {
       ElMessage.success('删除成功')
       loadData()
     } catch (error: any) {
-      console.error(error)
       ElMessage.error(error.message || '删除失败')
     }
   })
@@ -714,7 +709,6 @@ const handleViewDetails = async (row: Repair) => {
     currentRecord.value = detail
     showDetailsDialog.value = true
   } catch (error: any) {
-    console.error(error)
     ElMessage.error(error.message || '获取详情失败')
   }
 }

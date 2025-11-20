@@ -195,15 +195,6 @@
                   <el-icon><Check /></el-icon>
                   审批通过
                 </el-button>
-<!--                <el-button-->
-<!--                  v-if="row.status === 1"-->
-<!--                  size="small"-->
-<!--                  type="success"-->
-<!--                  @click="handleAssign(row)"-->
-<!--                >-->
-<!--                  <el-icon><Check /></el-icon>-->
-<!--                  审批通过-->
-<!--                </el-button>-->
                 <el-button
                   v-if="row.status === 1"
                   size="small"
@@ -222,15 +213,6 @@
                   <el-icon><Close /></el-icon>
                   取消
                 </el-button>
-<!--                <el-button-->
-<!--                  v-if="row.status === 2"-->
-<!--                  size="small"-->
-<!--                  type="warning"-->
-<!--                  @click="handleCheckout(row)"-->
-<!--                >-->
-<!--                  <el-icon><Switch /></el-icon>-->
-<!--                  退宿-->
-<!--                </el-button>-->
               </el-button-group>
             </template>
           </el-table-column>
@@ -648,7 +630,6 @@ const loadData = async () => {
     pagination.total = response.total
   } catch (error) {
     ElMessage.error('获取数据失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -661,7 +642,6 @@ const loadStatistics = async () => {
     statistics.value = response
   } catch (error) {
     ElMessage.error('获取统计数据失败')
-    console.error(error)
   }
 }
 
@@ -680,7 +660,6 @@ const searchStudents = async (query: string) => {
       value: student.id
     }))
   } catch (error) {
-    console.error(error)
     ElMessage.error('获取学生列表失败')
     studentOptions.value = []
   } finally {
@@ -701,7 +680,6 @@ const loadAvailableBeds = async () => {
       })) : []
     }))
   } catch (error) {
-    console.error(error)
     ElMessage.error('获取可用床位失败')
   }
 }
@@ -801,7 +779,6 @@ const handleSubmitApplication = async () => {
         loadData()
         loadStatistics()
       } catch (error: any) {
-        console.error(error)
         // 提取具体的错误信息
         let errorMessage = '申请提交失败'
         if (error && error.response && error.response.data) {
@@ -855,7 +832,6 @@ const handleSubmitApproval = async () => {
         loadStatistics()
       } catch (error) {
         ElMessage.error('审批失败')
-        console.error(error)
       } finally {
         submitting.value = false
       }
@@ -890,7 +866,6 @@ const handleSubmitAssignment = async () => {
     loadStatistics()
   } catch (error) {
     ElMessage.error('审批通过失败')
-    console.error(error)
   } finally {
     submitting.value = false
   }
@@ -924,7 +899,6 @@ const handleReject = (row: CheckIn) => {
       loadStatistics()
     } catch (error) {
       ElMessage.error('拒绝失败')
-      console.error(error)
     }
   }).catch(() => {
     ElMessage.info('已取消拒绝操作')
@@ -950,7 +924,6 @@ const handleSubmitCheckout = async () => {
     loadStatistics()
   } catch (error) {
     ElMessage.error('退宿失败')
-    console.error(error)
   } finally {
     submitting.value = false
   }
@@ -970,7 +943,6 @@ const handleCancel = (row: CheckIn) => {
       loadStatistics()
     } catch (error) {
       ElMessage.error('申请取消失败')
-      console.error(error)
     }
   })
 }
@@ -1006,7 +978,6 @@ const handleBatchApprove = () => {
       loadStatistics()
     } catch (error) {
       ElMessage.error('批量通过失败')
-      console.error(error)
     }
   }).catch(() => {
     ElMessage.info('已取消批量通过操作')
@@ -1051,7 +1022,6 @@ const handleBatchReject = () => {
       loadStatistics()
     } catch (error) {
       ElMessage.error('批量拒绝失败')
-      console.error(error)
     }
   }).catch(() => {
     ElMessage.info('已取消批量拒绝操作')
@@ -1077,7 +1047,6 @@ const handleBatchCheckout = () => {
       loadStatistics()
     } catch (error) {
       ElMessage.error('批量退宿失败')
-      console.error(error)
     }
   })
 }

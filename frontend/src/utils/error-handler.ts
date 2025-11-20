@@ -28,9 +28,6 @@ export class ErrorHandler {
     // 显示错误消息
     ElMessage.error(errorMessage)
 
-    // 在控制台输出详细信息，便于调试
-    console.error('API错误:', error)
-
     return errorMessage
   }
 
@@ -51,7 +48,6 @@ export class ErrorHandler {
     }
 
     ElMessage.error(errorMessage)
-    console.error('表单验证错误:', error)
     return errorMessage
   }
 
@@ -71,7 +67,6 @@ export class ErrorHandler {
     }
 
     ElMessage.error(errorMessage)
-    console.error('网络错误:', error)
     return errorMessage
   }
 
@@ -100,7 +95,6 @@ export class ErrorHandler {
       window.location.href = '/login'
     }
 
-    console.error('权限错误:', error)
     return errorMessage
   }
 

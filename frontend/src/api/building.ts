@@ -1,4 +1,4 @@
-import { request } from '@/utils/request'
+import request from '@/utils/request'
 
 // 宿舍楼请求参数
 export interface BuildingParams {

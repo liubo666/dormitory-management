@@ -502,7 +502,6 @@ const loadData = async () => {
     }
   } catch (error: any) {
     ElMessage.error('获取数据失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -519,7 +518,6 @@ const loadDormitoryOptions = async () => {
       }))
     }
   } catch (error) {
-    console.error('获取宿舍选项失败:', error)
   }
 }
 
@@ -533,7 +531,6 @@ const handleDormitorySearch = async (query: string) => {
       size: 20
     }
     const response = await searchDormitories(searchParams)
-    console.log('宿舍搜索API响应:', response)
 
     // 处理后端返回的数据结构，后端返回的是 IPage<DormitorySearchVO>
     // response已经是响应拦截器解包后的data字段
@@ -548,17 +545,13 @@ const handleDormitorySearch = async (query: string) => {
       dormitories = response.data
     }
 
-    console.log('解析到的宿舍数据:', dormitories)
-
     dormitoryOptions.value = dormitories.map((item: any) => ({
       label: `${item.buildingName} ${item.roomNo}`,
       value: item.id,
       buildingName: item.buildingName,
       roomNo: item.roomNo
     }))
-    console.log('处理后宿舍选项:', dormitoryOptions.value)
   } catch (error) {
-    console.error('搜索宿舍失败:', error)
     dormitoryOptions.value = []
   } finally {
     dormitorySearchLoading.value = false
@@ -575,7 +568,6 @@ const handleStudentSearch = async (query: string) => {
       size: 20
     }
     const response = await searchStudents(searchParams)
-    console.log('学生搜索API响应:', response)
 
     // 处理后端返回的数据结构，后端返回的是 IPage<StudentSearchVO>
     // response已经是响应拦截器解包后的data字段
@@ -590,17 +582,13 @@ const handleStudentSearch = async (query: string) => {
       students = response.data
     }
 
-    console.log('解析到的学生数据:', students)
-
     studentOptions.value = students.map((item: any) => ({
       label: `${item.studentNo} - ${item.name}`,
       value: item.id,
       studentNo: item.studentNo,
       name: item.name
     }))
-    console.log('处理后学生选项:', studentOptions.value)
   } catch (error) {
-    console.error('搜索学生失败:', error)
     studentOptions.value = []
   } finally {
     studentSearchLoading.value = false
@@ -844,8 +832,6 @@ const handleSubmit = async () => {
       ...form,
       roomId: form.roomId ? String(form.roomId) : null  // 确保roomId是字符串类型（后端期望）
     }
-
-    console.log('提交的表单数据:', submitData)
 
     if (isEdit.value) {
       await updateVisitor(submitData)
