@@ -63,7 +63,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - NODE_REGISTRY=https://registry.npmmirror.com
+        - NODE_REGISTRY=https://mirror.baidubce.com
     container_name: dormitory-frontend
     restart: unless-stopped
     ports:
