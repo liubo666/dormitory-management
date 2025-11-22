@@ -20,13 +20,28 @@ COPY . .
 # 构建应用 (跳过类型检查以避免构建失败)
 RUN npm run build-only
 
-# 生产阶段 - 使用Nginx提供静态文件服务
+# 生产阶段 - 使用简单的HTTP服务器
 FROM nginx:1.25-alpine
+
+# 创建nginx配置（只处理静态文件，不需要SSL）
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
 # 复制构建好的文件到nginx目录
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 暴露端口
+# 暴露端口（仅内部访问）
 EXPOSE 80
 
 # 启动nginx
