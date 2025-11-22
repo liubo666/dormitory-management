@@ -59,11 +59,12 @@ public class CheckInServiceImpl extends ServiceImpl<CheckInMapper, CheckIn> impl
         Page<CheckIn> checkInPage = new Page<>(page.getCurrent(), page.getSize());
         Page<CheckIn> result = this.page(checkInPage, queryWrapper);
 
+
         // 转换为VO
         Page<CheckInVO> voPage = new Page<>(page.getCurrent(), page.getSize());
         voPage.setTotal(result.getTotal());
 
-        List<CheckInVO> voList = result.getRecords().stream().map(this::convertToVO).toList();
+        List<CheckInVO> voList = result.getRecords().stream().map(this::convertToVO).collect(Collectors.toList());
         voPage.setRecords(voList);
 
         return voPage;

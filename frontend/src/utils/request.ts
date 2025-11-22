@@ -6,6 +6,7 @@ import axios, {
 } from 'axios'
 import type { AxiosInstance as AxiosInstanceType } from 'axios'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 // 接口响应数据格式
 export interface ApiResponse<T = any> {
@@ -20,6 +21,35 @@ export interface PageResponse<T = any> {
   total: number
   current: number
   size: number
+}
+
+// 处理token过期的通用函数
+const handleTokenExpired = (message: string) => {
+  // 防止多次调用
+  if (window.sessionStorage.getItem('token-expired-handled') === 'true') {
+    return
+  }
+
+  // 标记已处理，避免重复处理
+  window.sessionStorage.setItem('token-expired-handled', 'true')
+
+  // 清除所有认证相关的本地存储
+  localStorage.removeItem('token')
+  localStorage.removeItem('userInfo')
+  localStorage.removeItem('refreshToken')
+
+  // 显示错误提示
+  ElMessage.error(message)
+
+  // 延迟跳转，确保提示消息能够显示
+  setTimeout(() => {
+    // 检查当前是否已经在登录页面，避免重复跳转
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login'
+    }
+    // 清除处理标记
+    window.sessionStorage.removeItem('token-expired-handled')
+  }, 1500)
 }
 
 // 创建axios实例
@@ -81,14 +111,11 @@ service.interceptors.response.use(
       switch (status) {
         case 401:
           // 未授权，清除token并跳转到登录页
-          localStorage.removeItem('token')
-          localStorage.removeItem('userInfo')
-          localStorage.removeItem('refreshToken')
-          ElMessage.error('登录已过期，请重新登录')
-          window.location.href = '/login'
+          handleTokenExpired('登录已过期，请重新登录')
           break
         case 403:
-          errorMessage = errorMessage || '权限不足'
+          // 权限不足或token过期，清除token并跳转到登录页
+          handleTokenExpired(errorMessage || '登录已过期，请重新登录')
           break
         case 404:
           errorMessage = errorMessage || '请求的资源不存在'

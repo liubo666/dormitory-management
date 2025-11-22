@@ -10,6 +10,24 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: '登录', requiresAuth: false }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/register/index.vue'),
+    meta: { title: '注册', requiresAuth: false }
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/forgot-password/index.vue'),
+    meta: { title: '忘记密码', requiresAuth: false }
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/reset-password/index.vue'),
+    meta: { title: '重置密码', requiresAuth: false }
+  },
+  {
     path: '/',
     name: 'Layout',
     component: () => import('@/views/layout/index.vue'),
@@ -63,8 +81,25 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Fee',
         component: () => import('@/views/fee/index.vue'),
         meta: { title: '费用管理', icon: 'card-outline' }
+      },
+      {
+        path: 'registration',
+        name: 'Registration',
+        component: () => import('@/views/admin/registration/index.vue'),
+        meta: { title: '注册审批', icon: 'person-add-outline', requiresAdmin: true }
       }
     ]
+  },
+  {
+    path: '/registration/admin/approve/:token',
+    name: 'AdminApproval',
+    component: () => import('../views/admin/approval/index.vue'),
+    meta: { title: '申请审批', requiresAuth: false }
+  },
+  {
+    path: '/registration/admin/reject/:token',
+    name: 'AdminReject',
+    redirect: to => `/admin/approve/${to.params.token}`
   }
 ]
 

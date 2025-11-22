@@ -6,7 +6,8 @@ server:
 spring:
   application:
     name: dormitory-management
-
+#  profiles:
+#    active: dev  # 本地开发环境
 
   # 数据源配置 - 生产环境
   datasource:
@@ -35,35 +36,64 @@ spring:
           max-idle: 10
           min-idle: 5
 
+  mail:
+    # 系统邮箱的 SMTP 配置（以 163 系统邮箱为例，可替换为企业邮箱、QQ 邮箱等）
+    host: smtp.163.com  # 系统邮箱的 SMTP 服务器（参考之前的对照表）
+    port: 465           # SSL 端口（465 或 587，按邮箱要求配置）
+    username: dormtorysystem@163.com # 系统邮箱账号（统一发件人）
+    password: XTturntcDJN7uVgK  # 系统邮箱的授权码（不是登录密码！）
+    default-encoding: UTF-8  # 避免中文乱码
+    protocol: smtps     # 对应 465 端口（SSL 协议）
+    properties:
+      mail:
+        debug: true      # 调试日志（发送失败时排查）
+        smtp:
+          auth: true     # 启用身份认证
+        ssl:
+          enable: true   # 启用 SSL
+
   # Jackson 配置
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+
+# 应用配置
+app:
+  frontend:
+    url: http://127.0.0.1:3000  # 前端地址，用于邮件中的审批链接
 
 # JWT 配置 - 生产环境
 jwt:
   secret: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4
   expiration: 28800
 
-# 日志配置 - 生产环境
-logging:
-  level:
-    com.dormitory: INFO
-    root: INFO
-  file:
-    name: /opt/apps/dormitory-management/logs/application.log
-    max-size: 100MB
-    max-history: 30
 
-# MyBatis Plus 配置
+
 mybatis-plus:
+  # 实体类别名包（纯注解开发也建议保留，简化返回类型配置）
+  type-aliases-package: com.dormitory.management.entity
+  # 核心配置：日志+驼峰转换（纯注解开发无需修改）
   configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 控制台强制打印（不受 XML 影响）
     map-underscore-to-camel-case: true
+    log-prefix: "[MyBatis-Plus SQL] "  # 可选：区分 SQL 日志
+  # 全局配置（逻辑删除保持不变）
   global-config:
     db-config:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+logging:
+  level:
+    # 关键：必须是 Mapper 接口「实际所在包」（纯注解开发的核心扫描包）
+    com.dormitory.management.mapper: DEBUG  # 注解方法的日志触发关键
+    # 补充：打印 MyBatis 注解解析日志（帮助确认 SQL 拼接逻辑）
+    org.apache.ibatis.binding: DEBUG
+    com.baomidou.mybatis plus.core.conditions: DEBUG
+    # 减少冗余日志
+    org.springframework: WARN
+    com.zaxxer.hikari: INFO
 
 # 管理端点配置
 management:

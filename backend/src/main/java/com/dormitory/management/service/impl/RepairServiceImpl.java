@@ -1,5 +1,6 @@
 package com.dormitory.management.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -27,6 +28,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 报修服务实现类
@@ -41,13 +44,32 @@ public class RepairServiceImpl extends ServiceImpl<RepairMapper, Repair> impleme
 
     @Override
     public IPage<RepairVO> getRepairPage(RepairPageDTO params) {
-        Page<RepairVO> page = new Page<>(params.getCurrent(), params.getSize());
-        IPage<RepairVO> result = baseMapper.selectRepairPage(page, params);
+        // 构建查询条件
+        LambdaQueryWrapper<Repair> queryWrapper = new LambdaQueryWrapper<Repair>()
+                .eq(params.getRoomId() != null, Repair::getRoomId, params.getRoomId())
+                .like(params.getRoomNo() != null && !params.getRoomNo().trim().isEmpty(), Repair::getRoomNo, params.getRoomNo())
+                .eq(params.getStudentId() != null, Repair::getStudentId, params.getStudentId())
+                .like(params.getStudentName() != null && !params.getStudentName().trim().isEmpty(), Repair::getStudentName, params.getStudentName())
+                .eq(params.getType() != null && !params.getType().trim().isEmpty(), Repair::getType, params.getType())
+                .eq(params.getStatus() != null, Repair::getStatus, params.getStatus())
+                .eq(params.getPriority() != null, Repair::getPriority, params.getPriority())
+                .ge(params.getStartDate() != null && !params.getStartDate().trim().isEmpty(), Repair::getCreateTime, params.getStartDate())
+                .le(params.getEndDate() != null && !params.getEndDate().trim().isEmpty(), Repair::getCreateTime, params.getEndDate() + " 23:59:59")
+                .orderByDesc(Repair::getCreateTime);
 
-        // 设置状态和类型文本
-        result.getRecords().forEach(this::setRepairDisplayText);
+        // 执行分页查询
+        Page<Repair> page = new Page<>(params.getCurrent(), params.getSize());
+        IPage<Repair> repairPage = baseMapper.selectPage(page, queryWrapper);
 
-        return result;
+        // 转换为VO对象
+        Page<RepairVO> voPage = new Page<>(repairPage.getCurrent(), repairPage.getSize(), repairPage.getTotal());
+        List<RepairVO> voList = repairPage.getRecords().stream()
+                .map(this::convertToVO)
+                .peek(this::setRepairDisplayText)
+                .collect(Collectors.toList());
+
+        voPage.setRecords(voList);
+        return voPage;
     }
 
     @Override
@@ -146,5 +168,20 @@ public class RepairServiceImpl extends ServiceImpl<RepairMapper, Repair> impleme
         repairVO.setTypeText(RepairTypeEnum.getDescriptionByCode(repairVO.getType()));
         repairVO.setStatusText(RepairStatusEnum.getDescriptionByCode(repairVO.getStatus()));
         repairVO.setPriorityText(RepairPriorityEnum.getDescriptionByCode(repairVO.getPriority()));
+    }
+
+    /**
+     * 将Repair实体转换为RepairVO
+     */
+    private RepairVO convertToVO(Repair repair) {
+        RepairVO repairVO = new RepairVO();
+        BeanUtils.copyProperties(repair, repairVO);
+
+        // 处理图片列表
+        if (StringUtils.hasText(repair.getImages())) {
+            repairVO.setImageList(Arrays.asList(repair.getImages().split(",")));
+        }
+
+        return repairVO;
     }
 }

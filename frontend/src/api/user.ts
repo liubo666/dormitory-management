@@ -54,3 +54,28 @@ export function refreshToken(refreshTokenValue: string): Promise<LoginResponse> 
     params: { refreshToken: refreshTokenValue }
   })
 }
+
+// 忘记密码请求参数
+export interface ForgotPasswordParams {
+  email: string
+}
+
+/**
+ * 发送忘记密码邮件
+ */
+export function sendResetPasswordEmail(data: ForgotPasswordParams): Promise<void> {
+  return request.post('/user/forgot-password', data)
+}
+
+// 重置密码请求参数
+export interface ResetPasswordParams {
+  token: string
+  password: string
+}
+
+/**
+ * 重置密码
+ */
+export function resetPassword(data: ResetPasswordParams): Promise<void> {
+  return request.post('/user/reset-password', data)
+}

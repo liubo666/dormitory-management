@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+    <!-- 1. 定义日志输出格式（含时间、线程、日志级别、类名、信息） -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n" />
+    <!-- 2. 定义日志存储路径（可自定义，如 D:/logs/ 或 /var/log/） -->
+    <property name="LOG_PATH" value="logs/${spring.application.name}" />
+
+    <!-- 3. 控制台输出 Appender（打印到控制台） -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 4. 文件输出 Appender（按天滚动，保留 7 天） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志文件路径 -->
+        <file>${LOG_PATH}/app.log</file>
+        <!-- 滚动策略：按天分割 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/app-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>  <!-- 保留 7 天日志 -->
+            <totalSizeCap>1GB</totalSizeCap>  <!-- 总日志大小限制 1GB -->
+        </rollingPolicy>
+        <!-- 日志格式 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 5. 根日志级别（默认 INFO，避免冗余） -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />  <!-- 不需要文件输出可删除此行 -->
+    </root>
+
+    <!-- 6. 自定义包日志级别（覆盖 application.yml 配置，优先级更高） -->
+    <!-- Mapper 包：DEBUG 级别（打印 SQL 及参数） -->
+    <logger name="com.yourpackage.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </logger>
+    <!-- MyBatis 核心包：DEBUG 级别（可选，打印更详细的 MyBatis 内部日志） -->
+    <logger name="org.apache.ibatis" level="DEBUG" />
+    <!-- 数据库连接池：INFO 级别 -->
+    <logger name="com.zaxxer.hikari" level="INFO" />
+</configuration>

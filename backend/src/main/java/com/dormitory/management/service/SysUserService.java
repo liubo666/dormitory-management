@@ -43,4 +43,17 @@ public interface SysUserService extends IService<SysUser> {
      * @return 用户信息
      */
     UserInfo getUserInfoFromDb(Long userId);
+
+    /**
+     * 发送密码重置邮件
+     * @param email 邮箱地址
+     */
+    void sendResetPasswordEmail(String email);
+
+    /**
+     * 重置密码
+     * @param token 重置令牌
+     * @param newPassword 新密码
+     */
+    void resetPassword(String token, String newPassword);
 }

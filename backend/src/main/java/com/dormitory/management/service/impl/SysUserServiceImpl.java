@@ -12,9 +12,13 @@ import com.dormitory.management.util.JwtUtil;
 import com.dormitory.management.context.UserContext;
 import com.dormitory.management.utils.PasswordUtil;
 import com.dormitory.management.vo.UserInfoVO;
+import com.dormitory.management.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户服务实现类
@@ -25,6 +29,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private EmailService emailService;
+
+    // 简单的令牌存储机制（实际项目中应该使用Redis数据库）
+    private static final ConcurrentHashMap<String, Long> resetTokens = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Long> tokenExpiry = new ConcurrentHashMap<>();
+    private static final long TOKEN_EXPIRY_HOURS = 24; // 令牌24小时有效
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
@@ -125,5 +137,92 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return "普通用户";
         }
         return "其他";
+    }
+
+    @Override
+    public void sendResetPasswordEmail(String email) {
+        // 根据邮箱查询用户
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUser::getEmail, email)
+               .eq(SysUser::getStatus, 1)
+               .eq(SysUser::getDeleted, 0);
+
+        SysUser user = getOne(wrapper);
+        if (user == null) {
+            log.warn("未找到邮箱对应的用户：{}", email);
+            // 为了安全，不泄露用户是否存在的信息
+            // 可以抛出异常或返回成功，但不暴露具体信息
+            // 这里选择抛出异常，因为前端需要显示错误信息
+            throw new RuntimeException("该邮箱未注册或已被禁用");
+        }
+
+        try {
+            // 生成重置令牌
+            String resetToken = UUID.randomUUID().toString().replace("-", "");
+
+            // 存储重置令牌和用户ID关联，并设置过期时间
+            resetTokens.put(resetToken, user.getId());
+            tokenExpiry.put(resetToken, System.currentTimeMillis() + TimeUnit.HOURS.toMillis(TOKEN_EXPIRY_HOURS));
+
+            // 发送密码重置邮件
+            emailService.sendPasswordResetEmail(email, resetToken);
+
+            log.info("密码重置邮件发送成功，邮箱：{}，用户：{}，令牌：{}", email, user.getUsername(), resetToken);
+        } catch (Exception e) {
+            log.error("发送密码重置邮件失败，邮箱：{}", email, e);
+            throw new RuntimeException("发送密码重置邮件失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public void resetPassword(String token, String newPassword) {
+        // 验证令牌是否存在
+        if (!resetTokens.containsKey(token)) {
+            throw new RuntimeException("重置令牌无效或已过期");
+        }
+
+        // 验证令牌是否过期
+        Long expiryTime = tokenExpiry.get(token);
+        if (expiryTime == null || System.currentTimeMillis() > expiryTime) {
+            // 清理过期令牌
+            resetTokens.remove(token);
+            tokenExpiry.remove(token);
+            throw new RuntimeException("重置令牌无效或已过期");
+        }
+
+        // 获取用户ID
+        Long userId = resetTokens.get(token);
+        if (userId == null) {
+            throw new RuntimeException("重置令牌无效");
+        }
+
+        try {
+            // 查询用户
+            SysUser user = getById(userId);
+            if (user == null) {
+                throw new RuntimeException("用户不存在");
+            }
+
+            // 检查用户状态
+            if (user.getStatus() != 1) {
+                throw new RuntimeException("用户已被禁用");
+            }
+
+            // 更新密码
+            String encryptedPassword = PasswordUtil.encode(newPassword);
+            user.setPassword(encryptedPassword);
+
+            // 清理重置令牌
+            resetTokens.remove(token);
+            tokenExpiry.remove(token);
+
+            // 保存更新
+            updateById(user);
+
+            log.info("密码重置成功，用户ID：{}，用户名：{}", userId, user.getUsername());
+        } catch (Exception e) {
+            log.error("重置密码失败，令牌：{}", token, e);
+            throw new RuntimeException("重置密码失败：" + e.getMessage());
+        }
     }
 }

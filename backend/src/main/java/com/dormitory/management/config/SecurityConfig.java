@@ -60,6 +60,11 @@ public class SecurityConfig {
                     "/user/register",
                     "/user/logout",
                     "/user/refresh",
+                    "/user/forgot-password", // 忘记密码
+                    "/user/reset-password", // 重置密码
+                    "/registration/apply", // 注册申请提交
+                    "/registration/validate-admin/**", // 验证管理员工号
+                    "/registration/application/**", // 查看申请详情
                     "/captcha/**",
                     "/doc.html",
                     "/swagger-ui/**",
@@ -70,6 +75,11 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/actuator/info"
                 ).permitAll()
+
+                // 管理员审批接口需要身份验证
+                .requestMatchers(
+                    "/registration/admin/**" // 管理员专用接口
+                ).hasRole("ADMIN")
 
                 // 其他所有请求都需要有效的Token（JWT过滤器会验证）
                 .anyRequest().authenticated()

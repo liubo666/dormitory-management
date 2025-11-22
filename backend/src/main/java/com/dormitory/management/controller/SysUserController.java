@@ -1,6 +1,8 @@
 package com.dormitory.management.controller;
 
 import com.dormitory.management.common.Result;
+import com.dormitory.management.dto.ForgotPasswordDTO;
+import com.dormitory.management.dto.ResetPasswordDTO;
 import com.dormitory.management.dto.LoginDTO;
 import com.dormitory.management.dto.LoginVO;
 import com.dormitory.management.service.SysUserService;
@@ -91,6 +93,28 @@ public class SysUserController {
             return Result.success(loginVO);
         } catch (Exception e) {
             return Result.error("刷新Token失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "忘记密码")
+    @PostMapping("/forgot-password")
+    public Result<Void> forgotPassword(@Validated @RequestBody ForgotPasswordDTO forgotPasswordDTO) {
+        try {
+            sysUserService.sendResetPasswordEmail(forgotPasswordDTO.getEmail());
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "重置密码")
+    @PostMapping("/reset-password")
+    public Result<Void> resetPassword(@Validated @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        try {
+            sysUserService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getPassword());
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
         }
     }
 }
