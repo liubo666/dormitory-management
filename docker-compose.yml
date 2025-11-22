@@ -1,6 +1,29 @@
 #version: '3.8'
 
 services:
+  # Certbot证书申请服务
+  certbot:
+    image: certbot/certbot:latest
+    container_name: dormitory-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot --webroot-path=/var/www/certbot --email your-email@example.com --agree-tos --no-eff-email -d your-domain.com
+    profiles:
+      - certbot
+
+  # 证书自动续期服务
+  certbot-renew:
+    image: certbot/certbot:latest
+    container_name: dormitory-certbot-renew
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: renew --webroot --webroot-path=/var/www/certbot --quiet
+    restart: unless-stopped
+    profiles:
+      - certbot
+
   # MySQL数据库
   mysql:
     image: mysql:8.0
@@ -57,7 +80,7 @@ services:
     networks:
       - dormitory-network
 
-  # 前端Vue应用
+  # 前端Vue应用（支持HTTPS）
   frontend:
     build:
       context: ./frontend
@@ -68,8 +91,11 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - /home/liubo/prod/dormitory-management/frontend/logs:/var/log/nginx
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - backend
     networks:
