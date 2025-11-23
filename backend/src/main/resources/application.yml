@@ -61,7 +61,7 @@ spring:
 # 应用配置 - 开发环境
 app:
   frontend:
-    url: http://localhost:3000  # 开发环境前端地址
+    url: http://${EXTERNAL_IP}:${EXTERNAL_PORT}  # 开发环境前端地址
 
 # JWT 配置 - 开发环境
 jwt:
