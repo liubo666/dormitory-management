@@ -53,8 +53,9 @@ export default defineConfig(({ mode }) => {
       },
       chunkSizeWarningLimit: 1000
     } : {},
-    server: {
+    server: mode === 'development' ? {
       port: 3000,
+      host: '0.0.0.0', // 允许外网访问
       open: true,
       strictPort: true,
       proxy: {
@@ -63,7 +64,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true
         }
       }
-    },
+    } : undefined,
     define: {
       __APP_ENV__: JSON.stringify(env.VITE_APP_ENV || mode)
     }

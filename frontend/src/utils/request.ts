@@ -54,7 +54,7 @@ const handleTokenExpired = (message: string) => {
 
 // 创建axios实例
 const service: AxiosInstanceType = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'

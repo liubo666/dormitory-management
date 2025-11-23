@@ -20,12 +20,12 @@ COPY . .
 # 构建应用 (跳过类型检查以避免构建失败)
 RUN npm run build-only
 
-# 生产阶段 - 使用简单的HTTP服务器
+# 生产阶段 - 使用Nginx服务器
 FROM nginx:1.25-alpine
 
-# 创建nginx配置（只处理静态文件，不需要SSL）
+# 创建基本的nginx配置（监听3000端口）
 RUN echo 'server { \
-    listen 80; \
+    listen 3000; \
     server_name localhost; \
     root /usr/share/nginx/html; \
     index index.html; \
@@ -41,8 +41,8 @@ RUN echo 'server { \
 # 复制构建好的文件到nginx目录
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 暴露端口（仅内部访问）
-EXPOSE 80
+# 暴露端口
+EXPOSE 3000
 
 # 启动nginx
 CMD ["nginx", "-g", "daemon off;"]
