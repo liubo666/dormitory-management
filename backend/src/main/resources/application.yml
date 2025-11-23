@@ -15,7 +15,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/dormitory_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: root
-    password: Root123!
+    password: root
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -61,12 +61,20 @@ spring:
 # 应用配置 - 开发环境
 app:
   frontend:
-    url: http://${EXTERNAL_IP}:${EXTERNAL_PORT}  # 开发环境前端地址
+    url: http://${EXTERNAL_IP:localhost}:${EXTERNAL_PORT:3000}  # 开发环境前端地址
 
 # JWT 配置 - 开发环境
 jwt:
   secret: dev-secret-key-local-environment-only
   expiration: 28800
+
+# MinIO 配置
+minio:
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: Admin@123456
+  bucket-name: dormitory-avatars
+
 
 
 

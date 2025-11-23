@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dormitory.management.common.Result;
 import com.dormitory.management.dto.DormitoryDTO;
 import com.dormitory.management.dto.DormitoryPageDTO;
+import com.dormitory.management.dto.DormitoryUpdateDTO;
 import com.dormitory.management.service.DormitoryService;
 import com.dormitory.management.vo.DormitoryVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,14 +75,14 @@ public class DormitoryController {
     }
 
 @Operation(summary = "更新宿舍")
-    @PutMapping("/{id}")
-    public Result<Void> updateDormitory(
-            @Parameter(description = "宿舍ID") @PathVariable String id,
-            @Validated @RequestBody DormitoryDTO dormitoryDTO) {
-
+    @PostMapping("/update")
+    public Result<Void> updateDormitory(@Validated @RequestBody DormitoryUpdateDTO dormitoryDTO) {
         try {
-            dormitoryDTO.setId(Long.parseLong(id));
-            boolean success = dormitoryService.createDormitory(dormitoryDTO);
+            DormitoryDTO dormitoryDTOForService = new DormitoryDTO();
+            dormitoryDTOForService.setId(dormitoryDTO.getId());
+            dormitoryDTOForService.setRoomNo(dormitoryDTO.getRoomNo());
+            dormitoryDTOForService.setDescription(dormitoryDTO.getRemark());
+            boolean success = dormitoryService.createDormitory(dormitoryDTOForService);
             if (success) {
                 return Result.success();
             } else {

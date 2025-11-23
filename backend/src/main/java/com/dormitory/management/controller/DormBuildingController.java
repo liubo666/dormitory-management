@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dormitory.management.common.Result;
 import com.dormitory.management.dto.BuildingDTO;
 import com.dormitory.management.dto.BuildingPageDTO;
+import com.dormitory.management.dto.BuildingUpdateDTO;
 import com.dormitory.management.entity.DormBuilding;
 import com.dormitory.management.service.DormBuildingService;
 import com.dormitory.management.vo.BuildingVO;
@@ -63,14 +64,16 @@ public class DormBuildingController {
     }
 
     @Operation(summary = "更新宿舍楼")
-    @PutMapping("/{id}")
-    public Result<Void> updateBuilding(
-            @Parameter(description = "楼栋ID", required = true) @PathVariable Long id,
-            @Validated @RequestBody BuildingDTO buildingDTO) {
-
-        buildingDTO.setId(id);
+    @PostMapping("/update")
+    public Result<Void> updateBuilding(@Validated @RequestBody BuildingUpdateDTO buildingDTO) {
         try {
-            dormBuildingService.updateBuilding(buildingDTO);
+            BuildingDTO buildingDTOForService = new BuildingDTO();
+            buildingDTOForService.setId(buildingDTO.getId());
+            buildingDTOForService.setBuildingNo(buildingDTO.getBuildingNo());
+            buildingDTOForService.setBuildingName(buildingDTO.getBuildingName());
+            buildingDTOForService.setFloorCount(buildingDTO.getFloorCount());
+            buildingDTOForService.setDescription(buildingDTO.getDescription());
+            dormBuildingService.updateBuilding(buildingDTOForService);
             return Result.success();
         } catch (Exception e) {
             return Result.error(e.getMessage());

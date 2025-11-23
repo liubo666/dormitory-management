@@ -87,6 +87,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Registration',
         component: () => import('@/views/admin/registration/index.vue'),
         meta: { title: '注册审批', icon: 'person-add-outline', requiresAdmin: true }
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/settings/index.vue'),
+        meta: { title: '个人设置', icon: 'settings-outline' }
       }
     ]
   },

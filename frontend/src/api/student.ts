@@ -124,10 +124,37 @@ export function createStudent(data: StudentForm): Promise<void> {
 }
 
 /**
+ * 更新学生信息DTO
+ */
+export interface StudentUpdateDTO {
+  id: string
+  studentNo?: string
+  name?: string
+  gender?: number
+  birthDate?: string
+  idCard?: string
+  phone?: string
+  email?: string
+  college?: string
+  major?: string
+  className?: string
+  grade?: string
+  enrollmentDate?: string
+  graduationDate?: string
+  dormitoryId?: string
+  bedNo?: string
+  status?: number
+  homeAddress?: string
+  emergencyContact?: string
+  emergencyPhone?: string
+  remark?: string
+}
+
+/**
  * 更新学生信息
  */
-export function updateStudent(data: StudentForm): Promise<void> {
-  return request.put(`/student/${data.id}`, data)
+export function updateStudent(data: StudentUpdateDTO): Promise<void> {
+  return request.post('/student/update', data)
 }
 
 /**
@@ -138,10 +165,18 @@ export function deleteStudent(id: string): Promise<void> {
 }
 
 /**
+ * 修改学生状态DTO
+ */
+export interface StudentStatusUpdateDTO {
+  id: string
+  status: number
+}
+
+/**
  * 修改学生状态
  */
-export function updateStudentStatus(id: string, status: number): Promise<void> {
-  return request.put(`/student/${id}/status`, null, { params: { status } })
+export function updateStudentStatus(data: StudentStatusUpdateDTO): Promise<void> {
+  return request.post('/student/status', data)
 }
 
 /**
@@ -152,28 +187,35 @@ export function assignDormitory(studentId: string, data: DormitoryAssignment): P
 }
 
 /**
+ * 调换宿舍DTO
+ */
+export interface ChangeDormitoryDTO {
+  studentId: string
+  newDormitoryId: string
+  newBedNo: string
+  reason?: string
+}
+
+/**
  * 调换宿舍
  */
-export function changeDormitory(
-  studentId: string,
-  data: DormitoryChange
-): Promise<void> {
-  return request.put(`/student/${studentId}/change-dormitory`, null, {
-    params: {
-      newDormitoryId: data.newDormitoryId,
-      newBedNo: data.newBedNo,
-      reason: data.reason
-    }
-  })
+export function changeDormitory(data: ChangeDormitoryDTO): Promise<void> {
+  return request.post('/student/change-dormitory', data)
+}
+
+/**
+ * 学生退宿DTO
+ */
+export interface StudentCheckoutDTO {
+  studentId: string
+  reason?: string
 }
 
 /**
  * 退宿处理
  */
-export function checkoutDormitory(studentId: string, reason?: string): Promise<void> {
-  return request.put(`/student/${studentId}/checkout`, null, {
-    params: { reason }
-  })
+export function checkoutDormitory(data: StudentCheckoutDTO): Promise<void> {
+  return request.post('/student/checkout', data)
 }
 
 /**

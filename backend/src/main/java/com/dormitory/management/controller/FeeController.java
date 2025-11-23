@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.dormitory.management.common.Result;
 import com.dormitory.management.dto.FeeDTO;
 import com.dormitory.management.dto.FeePageDTO;
+import com.dormitory.management.dto.FeeUpdateDTO;
+import com.dormitory.management.dto.PaymentStatusUpdateDTO;
+import com.dormitory.management.dto.PartialPaymentDTO;
 import com.dormitory.management.service.FeeService;
 import com.dormitory.management.vo.FeeVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +59,18 @@ public class FeeController {
     /**
      * 更新费用
      */
-    @PutMapping("/update/{id}")
-    public Result<Boolean> updateFee(@PathVariable Long id, @RequestBody FeeDTO feeDTO) {
-        boolean result = feeService.updateFee(id, feeDTO);
+    @PostMapping("/update")
+    public Result<Boolean> updateFee(@RequestBody FeeUpdateDTO feeUpdateDTO) {
+        FeeDTO feeDTO = new FeeDTO();
+        feeDTO.setStudentId(feeUpdateDTO.getStudentId());
+        feeDTO.setRoomId(feeUpdateDTO.getDormitoryId());
+        feeDTO.setFeeType(feeUpdateDTO.getFeeType().equals("住宿费") ? 1 :
+                         feeUpdateDTO.getFeeType().equals("水电费") ? 2 :
+                         feeUpdateDTO.getFeeType().equals("网费") ? 3 : 4);
+        feeDTO.setAmount(feeUpdateDTO.getAmount());
+        feeDTO.setPaymentStatus(feeUpdateDTO.getPaymentStatus());
+        feeDTO.setRemark(feeUpdateDTO.getRemark());
+        boolean result = feeService.updateFee(feeUpdateDTO.getId(), feeDTO);
         return result ? Result.success(true) : Result.error("更新费用失败");
     }
 
@@ -83,12 +95,9 @@ public class FeeController {
     /**
      * 更新支付状态
      */
-    @PutMapping("/{id}/payment-status")
-    public Result<Boolean> updatePaymentStatus(
-            @PathVariable Long id,
-            @RequestParam Integer paymentStatus,
-            @RequestParam(required = false) BigDecimal paidAmount) {
-        boolean result = feeService.updatePaymentStatus(id, paymentStatus, paidAmount);
+    @PostMapping("/payment-status")
+    public Result<Boolean> updatePaymentStatus(@RequestBody PaymentStatusUpdateDTO updateDTO) {
+        boolean result = feeService.updatePaymentStatus(updateDTO.getId(), updateDTO.getPaymentStatus(), updateDTO.getPaidAmount());
         return result ? Result.success(true) : Result.error("更新支付状态失败");
     }
 
@@ -104,30 +113,28 @@ public class FeeController {
     /**
      * 标记为已支付
      */
-    @PutMapping("/{id}/paid")
-    public Result<Boolean> markAsPaid(@PathVariable Long id) {
-        FeeVO feeVO = feeService.getFeeById(id);
+    @PostMapping("/paid")
+    public Result<Boolean> markAsPaid(@RequestBody PaymentStatusUpdateDTO updateDTO) {
+        FeeVO feeVO = feeService.getFeeById(updateDTO.getId());
         if (feeVO == null) {
             return Result.error("费用不存在");
         }
 
-        boolean result = feeService.updatePaymentStatus(id, 2, feeVO.getAmount());
+        boolean result = feeService.updatePaymentStatus(updateDTO.getId(), 2, feeVO.getAmount());
         return result ? Result.success(true) : Result.error("标记为已支付失败");
     }
 
     /**
      * 部分支付
      */
-    @PutMapping("/{id}/partial-payment")
-    public Result<Boolean> partialPayment(
-            @PathVariable Long id,
-            @RequestParam BigDecimal paymentAmount) {
-        FeeVO feeVO = feeService.getFeeById(id);
+    @PostMapping("/partial-payment")
+    public Result<Boolean> partialPayment(@RequestBody PartialPaymentDTO paymentDTO) {
+        FeeVO feeVO = feeService.getFeeById(paymentDTO.getId());
         if (feeVO == null) {
             return Result.error("费用不存在");
         }
 
-        BigDecimal totalPaid = feeVO.getPaidAmount().add(paymentAmount);
+        BigDecimal totalPaid = feeVO.getPaidAmount().add(paymentDTO.getPaymentAmount());
         Integer paymentStatus;
         if (totalPaid.compareTo(feeVO.getAmount()) >= 0) {
             paymentStatus = 2; // 已支付
@@ -136,7 +143,7 @@ public class FeeController {
             paymentStatus = 1; // 部分支付
         }
 
-        boolean result = feeService.updatePaymentStatus(id, paymentStatus, totalPaid);
+        boolean result = feeService.updatePaymentStatus(paymentDTO.getId(), paymentStatus, totalPaid);
         return result ? Result.success(true) : Result.error("部分支付失败");
     }
 }

@@ -87,15 +87,16 @@ public class CheckInController {
     }
 
     @Operation(summary = "分配宿舍")
-    @PutMapping("/{id}/assign-dormitory")
-    public Result<Void> assignDormitory(
-            @Parameter(description = "入住记录ID") @PathVariable String id,
-            @Parameter(description = "宿舍ID") @RequestParam String dormitoryId,
-            @Parameter(description = "床位ID") @RequestParam String bedId,
-            @Parameter(description = "床位号") @RequestParam String bedNo) {
+    @PostMapping("/assign-dormitory")
+    public Result<Void> assignDormitory(@Validated @RequestBody DormitoryAssignDTO assignDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = checkInService.assignDormitory(id, dormitoryId, bedId, bedNo, currentUser);
+            boolean success = checkInService.assignDormitory(
+                    assignDTO.getCheckInId(),
+                    assignDTO.getDormitoryId(),
+                    assignDTO.getBedId(),
+                    assignDTO.getBedNo(),
+                    currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -107,13 +108,14 @@ public class CheckInController {
     }
 
     @Operation(summary = "退宿处理")
-    @PutMapping("/{id}/checkout")
-    public Result<Void> checkout(
-            @Parameter(description = "入住记录ID") @PathVariable String id,
-            @Parameter(description = "退宿原因") @RequestParam(required = false) String checkoutReason) {
+    @PostMapping("/checkout")
+    public Result<Void> checkout(@Validated @RequestBody CheckOutDTO checkoutDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = checkInService.checkout(id, checkoutReason, currentUser);
+            boolean success = checkInService.checkout(
+                    checkoutDTO.getCheckInId(),
+                    checkoutDTO.getCheckoutReason(),
+                    currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -125,13 +127,14 @@ public class CheckInController {
     }
 
     @Operation(summary = "取消入住申请")
-    @PutMapping("/{id}/cancel")
-    public Result<Void> cancelApplication(
-            @Parameter(description = "入住记录ID") @PathVariable String id,
-            @Parameter(description = "取消原因") @RequestParam String reason) {
+    @PostMapping("/cancel")
+    public Result<Void> cancelApplication(@Validated @RequestBody CancelApplicationDTO cancelDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = checkInService.cancelApplication(id, reason, currentUser);
+            boolean success = checkInService.cancelApplication(
+                    cancelDTO.getCheckInId(),
+                    cancelDTO.getReason(),
+                    currentUser);
             if (success) {
                 return Result.success();
             } else {

@@ -10,9 +10,11 @@ import com.dormitory.management.mapper.SysUserMapper;
 import com.dormitory.management.service.SysUserService;
 import com.dormitory.management.util.JwtUtil;
 import com.dormitory.management.context.UserContext;
+import com.dormitory.management.utils.MinioUtil;
 import com.dormitory.management.utils.PasswordUtil;
 import com.dormitory.management.vo.UserInfoVO;
 import com.dormitory.management.service.EmailService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MinioUtil  minioUtil;
 
     // 简单的令牌存储机制（实际项目中应该使用Redis数据库）
     private static final ConcurrentHashMap<String, Long> resetTokens = new ConcurrentHashMap<>();
@@ -89,19 +94,83 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public UserInfoVO getCurrentUserInfo() {
-        UserInfo userInfo = com.dormitory.management.context.UserContext.getCurrentUser();
+        UserInfo userInfo = UserContext.getCurrentUser();
         if (userInfo == null) {
             throw new RuntimeException("用户未登录");
         }
 
+        // 从数据库获取完整的用户信息
+        SysUser sysUser = getById(userInfo.getUserId());
+        if (sysUser == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
         UserInfoVO userInfoVO = new UserInfoVO();
-        userInfoVO.setId(userInfo.getUserId());
-        userInfoVO.setUsername(userInfo.getUsername());
-        userInfoVO.setName(userInfo.getRealName());
-        userInfoVO.setRole(userInfo.getRoleId());
-        userInfoVO.setEnabled(userInfo.getEnabled());
+        userInfoVO.setId(sysUser.getId());
+        userInfoVO.setUsername(sysUser.getUsername());
+        userInfoVO.setName(sysUser.getName());
+        userInfoVO.setGender(sysUser.getGender());
+        userInfoVO.setPhone(sysUser.getPhone());
+        userInfoVO.setEmail(sysUser.getEmail());
+        userInfoVO.setRole(sysUser.getRole());
+        userInfoVO.setAvatar(sysUser.getAvatar());
+        userInfoVO.setEnabled(sysUser.getStatus() == 1);
+        if (StringUtils.isNotBlank(sysUser.getAvatar())){
+            userInfoVO.setPreviewUrl(minioUtil.getPreviewUrl(sysUser.getAvatar()));
+        }
 
         return userInfoVO;
+    }
+
+    @Override
+    public UserInfoVO updateUserInfo(UserInfoVO userInfoVO) {
+        UserInfo currentUser = UserContext.getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("用户未登录");
+        }
+
+        // 获取当前用户信息
+        SysUser sysUser = getById(userInfoVO.getId());
+        if (sysUser == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 只允许更新指定字段：姓名、性别、手机号、邮箱、头像
+        if (userInfoVO.getName() != null) {
+            sysUser.setName(userInfoVO.getName());
+        }
+        if (userInfoVO.getGender() != null) {
+            sysUser.setGender(userInfoVO.getGender());
+        }
+        if (userInfoVO.getPhone() != null) {
+            sysUser.setPhone(userInfoVO.getPhone());
+        }
+        if (userInfoVO.getEmail() != null) {
+            sysUser.setEmail(userInfoVO.getEmail());
+        }
+        if (userInfoVO.getAvatar() != null) {
+            sysUser.setAvatar(userInfoVO.getAvatar());
+        }
+
+        // 更新数据库
+        boolean updated = updateById(sysUser);
+        if (!updated) {
+            throw new RuntimeException("更新失败");
+        }
+
+        // 返回更新后的用户信息
+        UserInfoVO updatedUserInfoVO = new UserInfoVO();
+        updatedUserInfoVO.setId(sysUser.getId());
+        updatedUserInfoVO.setUsername(sysUser.getUsername());
+        updatedUserInfoVO.setName(sysUser.getName());
+        updatedUserInfoVO.setGender(sysUser.getGender());
+        updatedUserInfoVO.setPhone(sysUser.getPhone());
+        updatedUserInfoVO.setEmail(sysUser.getEmail());
+        updatedUserInfoVO.setRole(sysUser.getRole());
+        updatedUserInfoVO.setAvatar(sysUser.getAvatar());
+        updatedUserInfoVO.setEnabled(sysUser.getStatus() == 1);
+
+        return updatedUserInfoVO;
     }
 
     @Override

@@ -61,10 +61,22 @@ export function createBuilding(data: BuildingForm): Promise<void> {
 }
 
 /**
+ * 更新宿舍楼DTO
+ */
+export interface BuildingUpdateDTO {
+  id: string
+  buildingNo?: string
+  buildingName?: string
+  floorCount?: number
+  description?: string
+  status?: number
+}
+
+/**
  * 更新宿舍楼
  */
-export function updateBuilding(data: BuildingForm): Promise<void> {
-   return request.put(`/building/${data.id}`, data)
+export function updateBuilding(data: BuildingUpdateDTO): Promise<void> {
+   return request.post('/building/update', data)
 }
 
 /**

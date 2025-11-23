@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -56,6 +57,17 @@ public class SysUserController {
         try {
             UserInfoVO userInfoVO = sysUserService.getCurrentUserInfo();
             return Result.success(userInfoVO);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "更新个人信息")
+    @PostMapping("/updateInfo")
+    public Result<UserInfoVO> updateUserInfo(@Valid @RequestBody UserInfoVO userInfoVO) {
+        try {
+            UserInfoVO updatedUserInfo = sysUserService.updateUserInfo(userInfoVO);
+            return Result.success(updatedUserInfo);
         } catch (Exception e) {
             return Result.error(e.getMessage());
         }

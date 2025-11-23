@@ -94,10 +94,24 @@ export function createDormitory(data: DormitoryForm): Promise<void> {
 }
 
 /**
+ * 宿舍更新DTO
+ */
+export interface DormitoryUpdateDTO {
+  id: string
+  buildingNo?: string
+  buildingName?: string
+  roomNo?: string
+  floorNumber?: number
+  bedInfos?: BedInfoDTO[]
+  description?: string
+  status?: number
+}
+
+/**
  * 更新宿舍
  */
-export function updateDormitory(data: DormitoryForm): Promise<void> {
-  return request.put(`/dormitory/${data.id}`, data)
+export function updateDormitory(data: DormitoryUpdateDTO): Promise<void> {
+  return request.post('/dormitory/update', data)
 }
 
 /**

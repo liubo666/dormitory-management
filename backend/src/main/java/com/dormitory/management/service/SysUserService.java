@@ -31,6 +31,13 @@ public interface SysUserService extends IService<SysUser> {
     UserInfoVO getCurrentUserInfo();
 
     /**
+     * 更新个人信息
+     * @param userInfoVO 用户信息
+     * @return 更新后的用户信息
+     */
+    UserInfoVO updateUserInfo(UserInfoVO userInfoVO);
+
+    /**
      * 根据用户名获取用户
      * @param username 用户名
      * @return 用户信息

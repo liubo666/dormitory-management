@@ -35,7 +35,8 @@
       "Bash(rm:*)",
       "Bash(docker info:*)",
       "Bash(echo:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npx kill-port:*)"
     ],
     "deny": [],
     "ask": []

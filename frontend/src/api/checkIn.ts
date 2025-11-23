@@ -108,35 +108,50 @@ export function approveApplication(data: CheckInApprovalDTO): Promise<void> {
 }
 
 /**
+ * 分配宿舍DTO
+ */
+export interface AssignDormitoryDTO {
+  id: string
+  dormitoryId: string
+  bedId: string
+  bedNo: string
+}
+
+/**
  * 分配宿舍
  */
-export function assignDormitory(
-  id: string,
-  dormitoryId: string,
-  bedId: string,
-  bedNo: string
-): Promise<void> {
-  return request.put(`/check-in/${id}/assign-dormitory`, null, {
-    params: { dormitoryId, bedId, bedNo }
-  })
+export function assignDormitory(data: AssignDormitoryDTO): Promise<void> {
+  return request.post('/check-in/assign-dormitory', data)
+}
+
+/**
+ * 退宿处理DTO
+ */
+export interface CheckoutDTO {
+  id: string
+  checkoutReason?: string
 }
 
 /**
  * 退宿处理
  */
-export function checkout(id: string, checkoutReason?: string): Promise<void> {
-  return request.put(`/check-in/${id}/checkout`, null, {
-    params: { checkoutReason }
-  })
+export function checkout(data: CheckoutDTO): Promise<void> {
+  return request.post('/check-in/checkout', data)
+}
+
+/**
+ * 取消入住申请DTO
+ */
+export interface CancelApplicationDTO {
+  id: string
+  reason: string
 }
 
 /**
  * 取消入住申请
  */
-export function cancelApplication(id: string, reason: string): Promise<void> {
-  return request.put(`/check-in/${id}/cancel`, null, {
-    params: { reason }
-  })
+export function cancelApplication(data: CancelApplicationDTO): Promise<void> {
+  return request.post('/check-in/cancel', data)
 }
 
 /**

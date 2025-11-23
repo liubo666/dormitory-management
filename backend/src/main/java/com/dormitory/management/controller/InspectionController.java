@@ -74,7 +74,7 @@ public class InspectionController {
     }
 
     @Operation(summary = "更新卫生检查记录")
-    @PutMapping
+    @PostMapping("/update")
     public Result<Void> update(@RequestBody @Validated InspectionDTO inspectionDTO) {
         try {
             boolean result = inspectionService.updateInspection(inspectionDTO, "admin");

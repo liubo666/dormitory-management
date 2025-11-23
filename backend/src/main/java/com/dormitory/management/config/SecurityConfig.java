@@ -82,6 +82,9 @@ public class SecurityConfig {
                     "/registration/admin/**" // 管理员专用接口
                 ).hasRole("ADMIN")
 
+                // 文件上传接口需要认证
+                .requestMatchers("/upload/**").authenticated()
+
                 // 其他所有请求都需要有效的Token（JWT过滤器会验证）
                 .anyRequest().authenticated()
             )

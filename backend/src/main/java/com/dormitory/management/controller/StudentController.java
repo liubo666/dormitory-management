@@ -5,6 +5,10 @@ import com.dormitory.management.common.Result;
 import com.dormitory.management.dto.DormitoryAssignmentDTO;
 import com.dormitory.management.dto.StudentDTO;
 import com.dormitory.management.dto.StudentPageDTO;
+import com.dormitory.management.dto.StudentUpdateDTO;
+import com.dormitory.management.dto.StudentStatusUpdateDTO;
+import com.dormitory.management.dto.ChangeDormitoryDTO;
+import com.dormitory.management.dto.StudentCheckoutDTO;
 import com.dormitory.management.service.StudentService;
 import com.dormitory.management.service.DormitoryService;
 import com.dormitory.management.context.UserContext;
@@ -75,14 +79,29 @@ public class StudentController {
     }
 
     @Operation(summary = "更新学生信息")
-    @PutMapping("/{id}")
-    public Result<Void> updateStudent(
-            @Parameter(description = "学生ID") @PathVariable String id,
-            @Validated @RequestBody StudentDTO studentDTO) {
+    @PostMapping("/update")
+    public Result<Void> updateStudent(@Validated @RequestBody StudentUpdateDTO studentDTO) {
         try {
-            studentDTO.setId(id);
+            StudentDTO studentDTOForService = new StudentDTO();
+            studentDTOForService.setId(studentDTO.getId());
+            studentDTOForService.setStudentNo(studentDTO.getStudentNo());
+            studentDTOForService.setName(studentDTO.getName());
+            studentDTOForService.setGender(studentDTO.getGender().equals("男") ? 1 : 0);
+            studentDTOForService.setCollege(studentDTO.getCollege());
+            studentDTOForService.setMajor(studentDTO.getMajor());
+            studentDTOForService.setGrade(studentDTO.getGrade());
+            studentDTOForService.setClassName(studentDTO.getClassName());
+            studentDTOForService.setPhone(studentDTO.getPhone());
+            studentDTOForService.setEmail(studentDTO.getEmail());
+            studentDTOForService.setIdCard(studentDTO.getIdCard());
+            studentDTOForService.setHomeAddress(studentDTO.getAddress());
+            studentDTOForService.setEmergencyContact(studentDTO.getEmergencyContact());
+            studentDTOForService.setEmergencyPhone(studentDTO.getEmergencyPhone());
+            studentDTOForService.setDormitoryId(studentDTO.getDormitoryId() != null ? studentDTO.getDormitoryId().toString() : null);
+            studentDTOForService.setBedNo(studentDTO.getBedNo());
+            studentDTOForService.setStatus(studentDTO.getCheckInStatus());
             String currentUser = getCurrentUser();
-            boolean success = studentService.updateStudent(studentDTO, currentUser);
+            boolean success = studentService.updateStudent(studentDTOForService, currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -110,13 +129,11 @@ public class StudentController {
     }
 
     @Operation(summary = "修改学生状态")
-    @PutMapping("/{id}/status")
-    public Result<Void> updateStudentStatus(
-            @Parameter(description = "学生ID") @PathVariable String id,
-            @Parameter(description = "状态") @RequestParam Integer status) {
+    @PostMapping("/status")
+    public Result<Void> updateStudentStatus(@RequestBody StudentStatusUpdateDTO statusDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = studentService.updateStudentStatus(id, status, currentUser);
+            boolean success = studentService.updateStudentStatus(statusDTO.getStudentId(), statusDTO.getStatus(), currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -147,15 +164,16 @@ public class StudentController {
     }
 
     @Operation(summary = "调换宿舍")
-    @PutMapping("/{id}/change-dormitory")
-    public Result<Void> changeDormitory(
-            @Parameter(description = "学生ID") @PathVariable String id,
-            @Parameter(description = "新宿舍ID") @RequestParam String newDormitoryId,
-            @Parameter(description = "新床位号") @RequestParam String newBedNo,
-            @Parameter(description = "调换原因") @RequestParam(required = false) String reason) {
+    @PostMapping("/change-dormitory")
+    public Result<Void> changeDormitory(@RequestBody ChangeDormitoryDTO changeDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = studentService.changeDormitory(Long.parseLong(id), Long.parseLong(newDormitoryId), newBedNo, reason, currentUser);
+            boolean success = studentService.changeDormitory(
+                    Long.parseLong(changeDTO.getStudentId()),
+                    Long.parseLong(changeDTO.getNewDormitoryId()),
+                    changeDTO.getNewBedNo(),
+                    changeDTO.getReason(),
+                    currentUser);
             if (success) {
                 return Result.success();
             } else {
@@ -167,13 +185,14 @@ public class StudentController {
     }
 
     @Operation(summary = "退宿处理")
-    @PutMapping("/{id}/checkout")
-    public Result<Void> checkoutDormitory(
-            @Parameter(description = "学生ID") @PathVariable String id,
-            @Parameter(description = "退宿原因") @RequestParam(required = false) String reason) {
+    @PostMapping("/checkout")
+    public Result<Void> checkoutDormitory(@RequestBody StudentCheckoutDTO checkoutDTO) {
         try {
             String currentUser = getCurrentUser();
-            boolean success = studentService.checkoutDormitory(Long.parseLong(id), reason, currentUser);
+            boolean success = studentService.checkoutDormitory(
+                    Long.parseLong(checkoutDTO.getStudentId()),
+                    checkoutDTO.getReason(),
+                    currentUser);
             if (success) {
                 return Result.success();
             } else {

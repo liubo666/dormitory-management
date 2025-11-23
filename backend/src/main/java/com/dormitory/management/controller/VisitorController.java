@@ -80,7 +80,7 @@ public class VisitorController {
     /**
      * 更新访客登记记录
      */
-    @PutMapping
+    @PostMapping("/update")
     public Result<String> updateVisitor(@RequestBody VisitorDTO visitorDTO) {
         try {
             boolean success = visitorService.updateVisitor(visitorDTO, null);

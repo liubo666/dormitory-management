@@ -14,7 +14,7 @@ export interface LoginResponse {
 
 // 用户信息
 export interface UserInfo {
-  id: number
+  id: string
   username: string
   name: string
   gender: number
@@ -22,7 +22,10 @@ export interface UserInfo {
   email: string
   role: string
   avatar: string
-  enabled: boolean
+  previewUrl: string // 预览头像链接
+  status: number
+  createTime?: string
+  updateTime?: string
 }
 
 /**
@@ -79,4 +82,25 @@ export interface ResetPasswordParams {
  */
 export function resetPassword(data: ResetPasswordParams): Promise<void> {
   return request.post('/user/reset-password', data)
+}
+
+/**
+ * 更新个人信息
+ */
+export function updateUserInfo(data: Partial<UserInfo>): Promise<UserInfo> {
+  return request.post('/user/updateInfo', data)
+}
+
+
+/**
+ * 修改密码
+ */
+export interface ChangePasswordParams {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+export function changePassword(data: ChangePasswordParams): Promise<void> {
+  return request.post('/user/change-password', data)
 }
