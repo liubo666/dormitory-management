@@ -7,17 +7,20 @@ WORKDIR /app
 # 接收构建参数
 ARG NODE_REGISTRY=https://registry.npmmirror.com
 
-# 复制package文件
+# 配置npm镜像源和缓存设置
+RUN npm config set registry ${NODE_REGISTRY} && \
+    npm config set cache /tmp/npm-cache
+
+# 先复制package文件和lock文件（利用Docker层缓存）
 COPY package*.json ./
 
-# 配置npm镜像源并安装依赖
-RUN npm config set registry ${NODE_REGISTRY} && \
-    npm ci --silent
+# 安装依赖（利用缓存层，只在package.json变化时重新安装）
+RUN npm ci --silent --prefer-offline --no-audit
 
-# 复制源代码
+# 复制源代码（只有在源代码变化时才重新构建）
 COPY . .
 
-# 构建应用 (跳过类型检查以避免构建失败)
+# 构建应用（使用优化的构建配置）
 RUN npm run build-only
 
 # 生产阶段 - 使用Nginx服务器
