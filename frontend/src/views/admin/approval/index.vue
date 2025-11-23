@@ -256,8 +256,16 @@ const handleApprove = async () => {
     await approveApplication(token)
     ElMessage.success('申请已通过')
 
-    // 重新加载申请信息以显示最新状态
-    await loadApplication()
+    // 审批成功后延迟关闭窗口
+    setTimeout(() => {
+      // 检查是否是窗口打开方式，如果是则关闭窗口，否则跳转
+      if (window.opener) {
+        window.close()
+      } else {
+        // 如果不是弹窗，则跳转到登录页面
+        router.push('/login')
+      }
+    }, 1500) // 1.5秒后关闭，给用户时间看到成功消息
   } catch (err: any) {
     ElMessage.error(err.message || '审批失败')
   } finally {
@@ -293,8 +301,16 @@ const handleReject = async () => {
     // 关闭对话框
     closeRejectDialog()
 
-    // 重新加载申请信息以显示最新状态
-    await loadApplication()
+    // 审批成功后延迟关闭窗口
+    setTimeout(() => {
+      // 检查是否是窗口打开方式，如果是则关闭窗口，否则跳转
+      if (window.opener) {
+        window.close()
+      } else {
+        // 如果不是弹窗，则跳转到登录页面
+        router.push('/login')
+      }
+    }, 1500) // 1.5秒后关闭，给用户时间看到成功消息
   } catch (err: any) {
     ElMessage.error(err.message || '驳回失败')
   } finally {

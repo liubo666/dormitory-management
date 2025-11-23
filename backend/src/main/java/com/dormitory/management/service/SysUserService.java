@@ -46,9 +46,10 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 发送密码重置邮件
+     * @param username 用户名
      * @param email 邮箱地址
      */
-    void sendResetPasswordEmail(String email);
+    void sendResetPasswordEmail(String username, String email);
 
     /**
      * 重置密码

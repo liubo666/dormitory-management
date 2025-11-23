@@ -119,7 +119,7 @@
             <el-checkbox v-model="formData.rememberPassword" class="remember-checkbox">
               记住密码
             </el-checkbox>
-            <router-link to="/forgot-password" class="forgot-password">忘记密码？</router-link>
+            <router-link :to="forgotPasswordLink" class="forgot-password">忘记密码？</router-link>
           </div>
         </el-form-item>
 
@@ -147,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
@@ -163,6 +163,14 @@ const formData = reactive({
   username: '',
   password: '',
   rememberPassword: false
+})
+
+// 计算忘记密码链接，包含用户名参数
+const forgotPasswordLink = computed(() => {
+  if (formData.username.trim()) {
+    return `/forgot-password?username=${encodeURIComponent(formData.username.trim())}`
+  }
+  return '/forgot-password'
 })
 
 const rules: FormRules = {

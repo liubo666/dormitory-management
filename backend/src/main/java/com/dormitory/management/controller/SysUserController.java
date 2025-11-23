@@ -100,7 +100,7 @@ public class SysUserController {
     @PostMapping("/forgot-password")
     public Result<Void> forgotPassword(@Validated @RequestBody ForgotPasswordDTO forgotPasswordDTO) {
         try {
-            sysUserService.sendResetPasswordEmail(forgotPasswordDTO.getEmail());
+            sysUserService.sendResetPasswordEmail(forgotPasswordDTO.getUsername(), forgotPasswordDTO.getEmail());
             return Result.success();
         } catch (Exception e) {
             return Result.error(e.getMessage());

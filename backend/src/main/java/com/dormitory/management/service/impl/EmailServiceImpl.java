@@ -17,12 +17,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 邮件服务实现类
@@ -87,7 +82,7 @@ public class EmailServiceImpl implements EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(fromEmail);
+            helper.setFrom(new InternetAddress(fromEmail, "宿舍管理系统"));
             helper.setTo(application.getEmail());
 
             if (approved) {
@@ -108,30 +103,30 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    @Override
-    public void sendTestEmail(String to, String subject, String content) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(content);
-
-            mailSender.send(message);
-            log.info("测试邮件发送成功，收件人：{}", to);
-        } catch (Exception e) {
-            log.error("测试邮件发送失败，收件人：{}", to, e);
-            throw new RuntimeException("邮件发送失败");
-        }
-    }
+//    @Override
+//    public void sendTestEmail(String to, String subject, String content) {
+//        try {
+//            SimpleMailMessage message = new SimpleMailMessage();
+//            message.setFrom(fromEmail);
+//            message.setTo(to);
+//            message.setSubject(subject);
+//            message.setText(content);
+//
+//            mailSender.send(message);
+//            log.info("测试邮件发送成功，收件人：{}", to);
+//        } catch (Exception e) {
+//            log.error("测试邮件发送失败，收件人：{}", to, e);
+//            throw new RuntimeException("邮件发送失败");
+//        }
+//    }
 
     /**
      * 构建管理员通知邮件内容
      */
     private String buildAdminNotificationEmail(RegistrationApplication application) {
-        // 智能跳转机制
-        String approveUrl = frontendUrl + "/registration/admin/approve/" + application.getApprovalToken() + "?action=approve";
-        String rejectUrl = frontendUrl + "/registration/admin/approve/" + application.getApprovalToken() + "?action=reject";
+        // 审批详情页面链接
+        String approvalUrl = frontendUrl + "/registration/admin/approve/" + application.getApprovalToken();
+        log.info("approvalUrl:{}",approvalUrl);
 
         StringWriter writer = new StringWriter();
         writer.write("<!DOCTYPE html>");
@@ -173,23 +168,7 @@ public class EmailServiceImpl implements EmailService {
 
         // 审批按钮 - 使用项目主题色
         writer.write("<div style='text-align: center; margin-bottom: 25px;'>");
-        writer.write("<a href='" + approveUrl + "' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 0 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); transition: all 0.3s ease;'>✓ 通过申请</a>");
-        writer.write("<a href='" + rejectUrl + "' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 0 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); transition: all 0.3s ease;'>✗ 驳回申请</a>");
-        writer.write("</div>");
-
-        // 备用链接区域
-        writer.write("<div style='background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;'>");
-        writer.write("<p style='margin: 0 0 15px 0; color: #6b7280; font-size: 13px; text-align: center;'>🔗 如果按钮无法点击，请复制以下链接到浏览器地址栏</p>");
-        writer.write("<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>");
-        writer.write("<div>");
-        writer.write("<p style='margin: 0 0 8px 0; color: #059669; font-weight: 600; font-size: 13px;'>✓ 通过链接：</p>");
-        writer.write("<p style='margin: 0; word-break: break-all; font-size: 11px; color: #4b5563; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e5e7eb; font-family: \"Consolas\", \"Monaco\", monospace;'>" + approveUrl + "</p>");
-        writer.write("</div>");
-        writer.write("<div>");
-        writer.write("<p style='margin: 0 0 8px 0; color: #dc2626; font-weight: 600; font-size: 13px;'>✗ 驳回链接：</p>");
-        writer.write("<p style='margin: 0; word-break: break-all; font-size: 11px; color: #4b5563; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e5e7eb; font-family: \"Consolas\", \"Monaco\", monospace;'>" + rejectUrl + "</p>");
-        writer.write("</div>");
-        writer.write("</div>");
+        writer.write("<a href='" + approvalUrl + "' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;'>📋 审批申请</a>");
         writer.write("</div>");
         writer.write("</div>");
 
@@ -345,6 +324,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject("密码重置请求 - 宿舍管理系统");
 
             String resetUrl = frontendUrl + "/reset-password?token=" + resetToken;
+            log.info("resetUrl111:{}",resetUrl);
             String content = buildPasswordResetEmail(resetUrl);
             helper.setText(content, true);
 
@@ -389,12 +369,6 @@ public class EmailServiceImpl implements EmailService {
         writer.write("<div style='text-align: center; margin-bottom: 25px;'>");
         writer.write("<a href='" + resetUrl + "' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 0 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;'>🔗 重置密码</a>");
         writer.write("</div>");
-
-        // 备用链接区域
-        writer.write("<div style='background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;'>");
-        writer.write("<p style='margin: 0 0 15px 0; color: #6b7280; font-size: 13px; text-align: center;'>🔗 如果按钮无法点击，请复制以下链接到浏览器地址栏</p>");
-        writer.write("<p style='margin: 0; word-break: break-all; font-size: 11px; color: #4b5563; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e5e7eb; font-family: \"Consolas\", \"Monaco\", monospace;'>" + resetUrl + "</p>");
-        writer.write("</div>");
         writer.write("</div>");
 
         // 安全提醒
@@ -414,6 +388,91 @@ public class EmailServiceImpl implements EmailService {
         writer.write("<div style='background: #f0f9ff; padding: 20px; text-align: center; border-top: 1px solid #bae6fd;'>");
         writer.write("<p style='margin: 0 0 10px 0; color: #6b7280; font-size: 12px; line-height: 1.5;'>此邮件由宿舍管理系统自动发送，请勿回复</p>");
         writer.write("<p style='margin: 0; color: #9ca3af; font-size: 11px;'>重置链接24小时内有效 | 技术支持：宿舍管理团队</p>");
+        writer.write("</div>");
+
+        writer.write("</div></body></html>");
+
+        return writer.toString();
+    }
+
+    @Override
+    public void sendPasswordResetSuccessEmail(String to, String username) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(new InternetAddress(fromEmail, "宿舍管理系统"));
+            helper.setTo(to);
+            helper.setSubject("密码重置成功 - 宿舍管理系统");
+
+            String content = buildPasswordResetSuccessEmail(username, to);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+            log.info("密码重置成功通知邮件发送成功，用户邮箱：{}，用户名：{}", to, username);
+        } catch (Exception e) {
+            log.error("发送密码重置成功通知邮件失败，用户邮箱：{}，用户名：{}", to, username, e);
+            // 密码重置成功通知发送失败不影响重置操作，只记录日志
+        }
+    }
+
+    /**
+     * 构建密码重置成功通知邮件内容
+     */
+    private String buildPasswordResetSuccessEmail(String username, String email) {
+        StringWriter writer = new StringWriter();
+        writer.write("<!DOCTYPE html>");
+        writer.write("<html><head><meta charset='UTF-8'><title>宿舍管理系统 - 密码重置成功</title></head><body>");
+
+        // 外层容器 - 符合项目风格
+        writer.write("<div style='font-family: \"Microsoft YaHei\", \"PingFang SC\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif; max-width: 600px; margin: 20px auto; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.1);'>");
+
+        // 头部 - 成功绿色渐变背景
+        writer.write("<div style='background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 30px; text-align: center;'>");
+        writer.write("<div style='color: white;'>");
+        writer.write("<div style='font-size: 48px; margin-bottom: 15px;'>✅</div>");
+        writer.write("<h1 style='margin: 0; font-size: 28px; font-weight: 600; letter-spacing: 0.5px;'>密码重置成功</h1>");
+        writer.write("<p style='margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; letter-spacing: 0.3px;'>宿舍管理系统</p>");
+        writer.write("</div>");
+        writer.write("</div>");
+
+        // 主体内容
+        writer.write("<div style='padding: 30px; background: white;'>");
+        writer.write("<p style='font-size: 16px; color: #1f2937; margin: 0 0 20px 0; line-height: 1.6;'>尊敬的 <strong style='color: #059669;'>" + username + "</strong>，您好！</p>");
+        writer.write("<p style='font-size: 15px; color: #4b5563; margin: 0 0 25px 0; line-height: 1.6;'>您的密码已成功重置！现在可以使用新密码登录宿舍管理系统。</p>");
+
+        // 成功信息卡片
+        writer.write("<div style='background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 4px solid #059669;'>");
+        writer.write("<h3 style='margin: 0 0 20px 0; color: #059669; font-size: 16px; font-weight: 600; text-align: center;'>🔐 重置完成</h3>");
+        writer.write("<div style='background: white; border-radius: 8px; padding: 20px; border: 1px solid #d1fae5;'>");
+        writer.write("<div style='margin-bottom: 15px;'><span style='color: #6b7280; font-size: 13px; font-weight: 500; display: block; margin-bottom: 5px;'>用户名</span><span style='color: #1f2937; font-size: 16px; font-weight: 600; font-family: \"Consolas\", \"Monaco\", monospace; background: #f8fafc; padding: 8px 12px; border-radius: 4px; display: inline-block;'>" + username + "</span></div>");
+        writer.write("<div style='margin-bottom: 15px;'><span style='color: #6b7280; font-size: 13px; font-weight: 500; display: block; margin-bottom: 5px;'>通知邮箱</span><span style='color: #1f2937; font-size: 15px; font-weight: 500;'>" + email + "</span></div>");
+        writer.write("<div><span style='color: #6b7280; font-size: 13px; font-weight: 500; display: block; margin-bottom: 5px;'>重置时间</span><span style='color: #1f2937; font-size: 15px; font-weight: 500;'>" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "</span></div>");
+        writer.write("</div>");
+        writer.write("</div>");
+
+        // 安全提醒
+        writer.write("<div style='background: #fefce8; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fde047;'>");
+        writer.write("<h3 style='margin: 0 0 15px 0; color: #d97706; font-size: 16px; font-weight: 600; display: flex; align-items: center;'><span style='margin-right: 8px;'>🛡️</span>安全提醒</h3>");
+        writer.write("<ul style='margin: 0; padding-left: 20px; color: #4b5563; font-size: 14px; line-height: 1.8;'>");
+        writer.write("<li style='margin-bottom: 8px; color: #059669; font-weight: 500;'>✓ 请妥善保管您的新密码，不要与他人分享</li>");
+        writer.write("<li style='margin-bottom: 8px; color: #059669; font-weight: 500;'>✓ 建议定期更换密码以确保账户安全</li>");
+        writer.write("<li style='margin-bottom: 8px; color: #059669; font-weight: 500;'>✓ 如果这不是您本人的操作，请立即联系管理员</li>");
+        writer.write("<li style='color: #d97706; font-weight: 500;'>⚠️ 如有异常登录，请及时修改密码</li>");
+        writer.write("</ul>");
+        writer.write("</div>");
+
+        // 快速登录按钮
+        writer.write("<div style='text-align: center; margin-bottom: 20px;'>");
+        writer.write("<a href='" + frontendUrl + "' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); transition: all 0.3s ease; letter-spacing: 0.5px;'>🚀 立即登录</a>");
+        writer.write("</div>");
+
+        writer.write("</div>");
+
+        // 底部
+        writer.write("<div style='background: #f0fdf4; padding: 20px; text-align: center; border-top: 1px solid #d1fae5;'>");
+        writer.write("<p style='margin: 0 0 10px 0; color: #6b7280; font-size: 12px; line-height: 1.5;'>此邮件由宿舍管理系统自动发送，请勿回复</p>");
+        writer.write("<p style='margin: 0; color: #9ca3af; font-size: 11px;'>密码重置成功 | 技术支持：宿舍管理团队</p>");
         writer.write("</div>");
 
         writer.write("</div></body></html>");

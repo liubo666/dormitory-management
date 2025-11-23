@@ -41,6 +41,11 @@
           label-position="top"
           @keyup.enter="handleSendResetEmail"
         >
+          <!-- 隐藏的用户名字段，用于表单验证和后台传递 -->
+          <el-form-item prop="username" style="display: none;">
+            <el-input v-model="formData.username" />
+          </el-form-item>
+
           <el-form-item prop="email">
             <el-input
               v-model="formData.email"
@@ -79,19 +84,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { ArrowLeft, Message } from '@element-plus/icons-vue'
+import { ArrowLeft, Message, User } from '@element-plus/icons-vue'
 import { sendResetPasswordEmail, type ForgotPasswordParams } from '@/api/user'
 
 const router = useRouter()
+const route = useRoute()
 const message = ElMessage
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 
 const formData = reactive<ForgotPasswordParams>({
+  username: '',
   email: ''
 })
 
@@ -110,6 +117,22 @@ const rules: FormRules = {
   ]
 }
 
+// 页面加载时检查URL参数中的用户名
+onMounted(() => {
+  const usernameParam = route.query.username as string
+  if (usernameParam) {
+    // 解码URL参数并填充到表单
+    formData.username = decodeURIComponent(usernameParam)
+  } else {
+    // 如果没有用户名参数，提示用户从登录页面进入
+    ElMessage.warning('请先从登录页面输入用户名后再点击忘记密码')
+    // 延迟跳转到登录页面
+    setTimeout(() => {
+      router.push('/login')
+    }, 1000)
+  }
+})
+
 const handleSendResetEmail = async () => {
   if (!formRef.value) return
 
@@ -126,7 +149,7 @@ const handleSendResetEmail = async () => {
     // 跳转到登录页面
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 1000)
 
   } catch (error: any) {
     console.error('发送重置邮件失败:', error)

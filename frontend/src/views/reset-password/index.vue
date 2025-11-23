@@ -183,10 +183,10 @@ const handleResetPassword = async () => {
 
     message.success('密码重置成功，请使用新密码登录')
 
-    // 跳转到登录页面
+    // 延迟跳转到登录页面，给用户时间看到成功消息
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 1000)
 
   } catch (error: any) {
     console.error('重置密码失败:', error)

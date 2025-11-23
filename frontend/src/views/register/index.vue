@@ -305,7 +305,7 @@ const submitRegister = async () => {
     // 延迟跳转到登录页面
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 1000)
 
   } catch (error: any) {
     if (error.message) {

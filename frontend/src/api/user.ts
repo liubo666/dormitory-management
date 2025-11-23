@@ -57,6 +57,7 @@ export function refreshToken(refreshTokenValue: string): Promise<LoginResponse> 
 
 // 忘记密码请求参数
 export interface ForgotPasswordParams {
+  username: string
   email: string
 }
 

@@ -140,20 +140,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public void sendResetPasswordEmail(String email) {
-        // 根据邮箱查询用户
+    public void sendResetPasswordEmail(String username, String email) {
+        // 根据用户名和邮箱查询用户
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getEmail, email)
+        wrapper.eq(SysUser::getUsername, username)
+               .eq(SysUser::getEmail, email)
                .eq(SysUser::getStatus, 1)
                .eq(SysUser::getDeleted, 0);
 
         SysUser user = getOne(wrapper);
         if (user == null) {
-            log.warn("未找到邮箱对应的用户：{}", email);
+            log.warn("未找到用户名和邮箱对应的用户：{}, {}", username, email);
             // 为了安全，不泄露用户是否存在的信息
             // 可以抛出异常或返回成功，但不暴露具体信息
             // 这里选择抛出异常，因为前端需要显示错误信息
-            throw new RuntimeException("该邮箱未注册或已被禁用");
+            throw new RuntimeException("用户名和邮箱不匹配或该用户已被禁用");
         }
 
         try {
@@ -169,7 +170,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
             log.info("密码重置邮件发送成功，邮箱：{}，用户：{}，令牌：{}", email, user.getUsername(), resetToken);
         } catch (Exception e) {
-            log.error("发送密码重置邮件失败，邮箱：{}", email, e);
+            log.error("发送密码重置邮件失败，邮箱：{}，用户：{}", email, username, e);
             throw new RuntimeException("发送密码重置邮件失败：" + e.getMessage());
         }
     }
@@ -220,6 +221,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             updateById(user);
 
             log.info("密码重置成功，用户ID：{}，用户名：{}", userId, user.getUsername());
+
+            // 发送密码重置成功通知邮件
+            try {
+                emailService.sendPasswordResetSuccessEmail(user.getEmail(), user.getUsername());
+            } catch (Exception e) {
+                // 邮件发送失败不影响重置操作，只记录日志
+                log.warn("发送密码重置成功通知邮件失败，用户：{}，邮箱：{}", user.getUsername(), user.getEmail(), e);
+            }
         } catch (Exception e) {
             log.error("重置密码失败，令牌：{}", token, e);
             throw new RuntimeException("重置密码失败：" + e.getMessage());

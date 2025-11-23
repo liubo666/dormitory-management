@@ -17,13 +17,18 @@ public interface EmailService {
      */
     void sendApprovalEmailToUser(RegistrationApplication application, boolean approved, String rejectionReason);
 
-    /**
-     * 发送测试邮件
-     */
-    void sendTestEmail(String to, String subject, String content);
+//    /**
+//     * 发送测试邮件
+//     */
+//    void sendTestEmail(String to, String subject, String content);
 
     /**
      * 发送密码重置邮件
      */
     void sendPasswordResetEmail(String to, String resetToken);
+
+    /**
+     * 发送密码重置成功通知邮件
+     */
+    void sendPasswordResetSuccessEmail(String to, String username);
 }

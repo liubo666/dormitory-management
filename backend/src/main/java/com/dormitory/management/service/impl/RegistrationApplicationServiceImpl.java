@@ -18,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +41,8 @@ public class RegistrationApplicationServiceImpl implements RegistrationApplicati
     public String submitApplication(RegistrationApplicationDTO dto) {
         // 检查用户名是否已存在
         LambdaQueryWrapper<RegistrationApplication> usernameWrapper = new LambdaQueryWrapper<>();
-        usernameWrapper.eq(RegistrationApplication::getUsername, dto.getUsername());
+        usernameWrapper.eq(RegistrationApplication::getUsername, dto.getUsername())
+                .in(RegistrationApplication::getStatus, Arrays.asList(1, 2));
         if (registrationApplicationMapper.selectOne(usernameWrapper) != null) {
             throw new RuntimeException("用户名已存在");
         }
