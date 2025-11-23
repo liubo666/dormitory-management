@@ -72,7 +72,6 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/favicon.svg",
                     "/logo-placeholder.svg",
-                    "/favicon.ico",
                     "/error",
                     "/actuator/health",
                     "/actuator/info"
