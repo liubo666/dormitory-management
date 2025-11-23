@@ -70,6 +70,8 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/webjars/**",
+                    "/favicon.svg",
+                    "/logo-placeholder.svg",
                     "/favicon.ico",
                     "/error",
                     "/actuator/health",

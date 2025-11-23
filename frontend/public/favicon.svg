@@ -1,0 +1,17 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 圆形背景 -->
+  <circle cx="16" cy="16" r="16" fill="#1e40af"/>
+
+  <!-- 小房子图标 -->
+  <g fill="white">
+    <!-- 屋顶 -->
+    <path d="M7 15L16 6L25 15V23C25 24.1046 24.1046 25 23 25H9C7.89543 25 7 24.1046 7 23V15Z"/>
+    <!-- 烟囱 -->
+    <rect x="19" y="10" width="3" height="4" fill="white"/>
+    <!-- 门 -->
+    <rect x="14" y="18" width="4" height="7" fill="#1e40af"/>
+    <!-- 窗户 -->
+    <rect x="10" y="17" width="2.5" height="2.5" fill="#1e40af"/>
+    <rect x="19.5" y="17" width="2.5" height="2.5" fill="#1e40af"/>
+  </g>
+</svg>
