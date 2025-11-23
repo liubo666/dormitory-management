@@ -107,7 +107,7 @@ public class MinioUtil {
 
 
     /**
-     * 获取文件访问URL（预签名URL）
+     * 获取文件访问URL
      */
     public String getPreviewUrl(String fileName) {
         try {
@@ -120,28 +120,43 @@ public class MinioUtil {
                 previewUrl = cachedUrl;
                 log.info("从Redis缓存获取预览URL: {}", previewUrl);
             } else {
-                // 缓存中不存在，生成新的预签名URL
-                // 生成预签名URL，有效期7天
-                String objectName = fileName;
-                // 如果fileName包含bucket名称，则提取object部分
-                if (fileName.contains("/")) {
-                    String[] parts = fileName.split("/", 2); // 使用 split("/", 2) 只分割一次
-                    if (parts.length == 2) {
-                        objectName = parts[1]; // "avatars/168bd1f0-88a1-4e8f-999f-ded3cbce865b.png"
+                // 缓存中不存在，生成新的URL
+                if (minioConfig.isUseProxy()) {
+                    // 使用Nginx代理URL - 不需要预签名，通过Nginx代理访问
+                    String objectName = fileName;
+                    // 如果fileName包含bucket名称，则提取object部分
+                    if (fileName.contains("/")) {
+                        String[] parts = fileName.split("/", 2);
+                        if (parts.length == 2) {
+                            objectName = parts[1];
+                        }
                     }
-                }
+                    previewUrl = minioConfig.getExternalUrl() + "/" + objectName;
+                    log.info("通过Nginx代理生成文件访问URL: {}", previewUrl);
+                } else {
+                    // 使用MinIO预签名URL
+                    String objectName = fileName;
+                    // 如果fileName包含bucket名称，则提取object部分
+                    if (fileName.contains("/")) {
+                        String[] parts = fileName.split("/", 2);
+                        if (parts.length == 2) {
+                            objectName = parts[1];
+                        }
+                    }
 
-                previewUrl= minioClient.getPresignedObjectUrl(
-                        GetPresignedObjectUrlArgs.builder()
-                                .method(Method.GET)
-                                .bucket(minioConfig.getBucketName())
-                                .object(objectName)
-                                .expiry(7, TimeUnit.DAYS)
-                                .build()
-                );
+                    previewUrl = minioClient.getPresignedObjectUrl(
+                            GetPresignedObjectUrlArgs.builder()
+                                    .method(Method.GET)
+                                    .bucket(minioConfig.getBucketName())
+                                    .object(objectName)
+                                    .expiry(7, TimeUnit.DAYS)
+                                    .build()
+                    );
+                    log.info("生成MinIO预签名URL: {}", previewUrl);
+                }
                 // 存入Redis缓存，有效期7天
                 redisTemplate.opsForValue().set(cacheKey, previewUrl, 6, TimeUnit.DAYS);
-                log.info("生成新的预签名URL并缓存: {}", previewUrl);
+                log.info("生成新的访问URL并缓存: {}", previewUrl);
             }
             log.info("生成文件访问URL: {}", previewUrl);
             return previewUrl;

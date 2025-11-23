@@ -40,6 +40,16 @@ public class MinioConfig {
     private boolean secure;
 
     /**
+     * 是否通过Nginx代理访问
+     */
+    private boolean useProxy;
+
+    /**
+     * 外部访问的基础URL (通过nginx代理)
+     */
+    private String externalUrl;
+
+    /**
      * 创建MinIO客户端
      */
     @Bean

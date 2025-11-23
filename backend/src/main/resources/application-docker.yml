@@ -79,6 +79,10 @@ minio:
   secret-key: ${MINIO_SECRET_KEY:Admin@123456}
   bucket-name: ${MINIO_BUCKET_NAME:dormitory-avatars}
   secure: ${MINIO_SECURE:false}
+  # 是否通过Nginx代理访问
+  use-proxy: ${MINIO_USE_PROXY:true}
+  # 外部访问的基础URL (通过nginx代理)
+  external-url: ${MINIO_EXTERNAL_URL:http://${SERVER_EXTERNAL_IP:localhost}:${SERVER_EXTERNAL_PORT:80}/files}
 
 # 管理端点配置
 management:
