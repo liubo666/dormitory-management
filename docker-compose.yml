@@ -74,8 +74,9 @@ services:
     volumes:
       - minio_data:/data
     # 关键修正 2：添加 --hsts off 参数，彻底禁用 HSTS
-    command: server /data --console-address ":9001" --hsts off
-    # 移除健康检查，避免容器重启问题
+    command: server /data --console-address ":9001"
+    # 明确禁用健康检查，避免容器重启问题
+
     networks:
       - dormitory-network
 
