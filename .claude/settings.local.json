@@ -37,7 +37,8 @@
       "Bash(echo:*)",
       "Bash(python3:*)",
       "Bash(npx kill-port:*)",
-      "Bash(docker-compose stop:*)"
+      "Bash(docker-compose stop:*)",
+      "Bash(docker ps:*)"
     ],
     "deny": [],
     "ask": []

@@ -49,9 +49,9 @@ EXPOSE 8080
 # 设置JVM参数
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
 
-# 健康检查已禁用
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-#   CMD curl -f http://localhost:8080/api/actuator/health || exit 1
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/api/actuator/health || exit 1
 
 # 启动应用
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
