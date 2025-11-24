@@ -75,12 +75,7 @@ services:
       - minio_data:/data
     # 关键修正 2：添加 --hsts off 参数，彻底禁用 HSTS
     command: server /data --console-address ":9001" --hsts off
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/minio/health/live" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+    # 移除健康检查，避免容器重启问题
     networks:
       - dormitory-network
 
@@ -91,12 +86,7 @@ services:
       dockerfile: Dockerfile
     container_name: dormitory-backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+    # 健康检查在 Dockerfile 中已配置，避免重复配置
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-dormitory_management}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
