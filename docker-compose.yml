@@ -159,8 +159,17 @@ services:
     depends_on:
       - frontend
       - backend
+      - minio  # 明确依赖 minio 服务
     networks:
       - dormitory-network
+    # 核心修改：在启动Nginx前，等待minio:9000端口可用
+    command: >
+      sh -c "
+        echo 'Waiting for minio to be available...';
+        while ! nc -z minio 9000; do sleep 1; done;
+        echo 'Minio is available, starting Nginx...';
+        nginx -g 'daemon off;'
+      "
 
 # 数据卷
 volumes:
