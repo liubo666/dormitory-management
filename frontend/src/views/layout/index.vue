@@ -10,7 +10,11 @@
       <div class="header-right">
         <el-dropdown trigger="hover" @command="handleUserMenuSelect">
           <div class="user-info">
-            <el-avatar :size="32" style="background-color: #1e40af;">
+            <el-avatar
+              :size="32"
+              :src="getUserAvatarUrl"
+              @error="handleAvatarError"
+            >
               <el-icon><User /></el-icon>
             </el-avatar>
             <span class="username">{{ userStore.userInfo?.name || '管理员' }}</span>
@@ -92,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
@@ -123,6 +127,20 @@ const handleMenuSelect = (key: string) => {
   router.push(`/${key}`)
 }
 
+// 获取用户头像URL - 直接使用后端返回的previewUrl
+const getUserAvatarUrl = computed(() => {
+  const userInfo = userStore.userInfo
+
+  // 直接使用后端返回的previewUrl
+  return userInfo?.previewUrl || ''
+})
+
+// 处理头像加载错误 - 显示默认头像
+const handleAvatarError = (e: Event) => {
+  const target = e.target as HTMLImageElement
+  target.src = '' // 清空src，显示默认图标
+}
+
 // 处理用户菜单选择
 const handleUserMenuSelect = async (key: string) => {
   if (key === 'logout') {
@@ -149,6 +167,11 @@ const handleUserMenuSelect = async (key: string) => {
     router.push('/settings')
   }
 }
+
+// 监听用户信息变化，确保头像能及时更新
+watch(() => userStore.userInfo, () => {
+  // 头像会自动刷新，无需额外处理
+}, { deep: true })
 
 onMounted(async () => {
   // 初始化用户信息

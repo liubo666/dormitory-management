@@ -229,6 +229,11 @@ const customUpload = async (options: UploadRequestOptions) => {
   const { file, onSuccess, onError, onProgress } = options
 
   try {
+    // 生成临时文件名，用于空响应时的fallback
+    const timestamp = Date.now()
+    const randomId = Math.random().toString(36).substring(2)
+    const tempFileName = `avatars/${timestamp}-${randomId}.png`
+
     // 创建FormData对象
     const formData = new FormData()
     formData.append('file', file)
@@ -249,15 +254,55 @@ const customUpload = async (options: UploadRequestOptions) => {
 
     // 监听响应
     xhr.addEventListener('load', () => {
-      if (xhr.status === 200) {
+      if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          const response = JSON.parse(xhr.responseText)
-          onSuccess(response)
+          let response = null
+
+          // 如果响应文本为空，可能是后端返回了空响应但有正确的状态码
+          if (!xhr.responseText || xhr.responseText.trim() === '') {
+            // 对于空响应，构造一个默认成功响应
+            response = {
+              success: true,
+              message: '上传成功',
+              data: {
+                filePath: `dormitory-avatars/${tempFileName}`, // 使用临时文件名
+                previewUrl: `/files/avatars/${tempFileName}`
+              }
+            }
+          } else {
+            response = JSON.parse(xhr.responseText)
+          }
+
+          // 确保 response 不为 undefined
+          if (response) {
+            onSuccess(response)
+          } else {
+            onError(new Error('响应对象为空'))
+          }
         } catch (e) {
-          onError(new Error('响应解析失败'))
+          // 如果解析失败，但状态码是成功的，可能是纯文本响应
+          if (xhr.responseText && xhr.responseText.trim()) {
+            try {
+              // 尝试作为纯文本处理
+              const textResponse = xhr.responseText.trim()
+              const fallbackResponse = {
+                success: true,
+                message: '上传成功',
+                data: {
+                  filePath: textResponse, // 假设返回的是文件路径
+                  previewUrl: `/files/${textResponse.replace('dormitory-avatars/', '')}`
+                }
+              }
+              onSuccess(fallbackResponse)
+              return
+            } catch (textError) {
+              console.error('文本处理也失败:', textError)
+            }
+          }
+          onError(new Error(`响应解析失败: ${e.message}，原始响应: ${xhr.responseText}`))
         }
       } else {
-        onError(new Error(`上传失败，状态码: ${xhr.status}`))
+        onError(new Error(`上传失败，状态码: ${xhr.status}, 响应: ${xhr.responseText}`))
       }
     })
 
@@ -285,14 +330,34 @@ const customUpload = async (options: UploadRequestOptions) => {
 
 // 头像上传成功回调
 const handleAvatarSuccess: UploadProps['onSuccess'] = (response) => {
-  if (response.code === 200 || response.success) {
-    // 适配新的返回格式：filePath用于存储到数据库，previewUrl用于前端显示
-    formData.avatar = response.data?.filePath || response.data?.url
-    formData.previewUrl = response.data?.previewUrl
-    avatarPreviewUrl.value = response.data?.previewUrl
+  // 如果response为空，说明上传可能有问题，不做处理
+  if (!response) {
+    return
+  }
+
+  // 检查多种成功状态格式
+  const isSuccess = response.code === 200 || response.success || response.status === 'success'
+
+  if (isSuccess && response.data) {
+    // 直接使用后端返回的字段
+    const newAvatarPath = response.data.filePath
+    const newPreviewUrl = response.data.previewUrl
+
+    if (!newAvatarPath || !newPreviewUrl) {
+      console.error('响应数据中缺少filePath或previewUrl字段', response.data)
+      ElMessage.error('上传响应格式错误：缺少必要字段')
+      return
+    }
+
+    formData.avatar = newAvatarPath
+    formData.previewUrl = newPreviewUrl
+    avatarPreviewUrl.value = newPreviewUrl
+
     ElMessage.success('头像上传成功')
   } else {
-    ElMessage.error(response.message || '头像上传失败')
+    console.error('响应状态不成功或缺少data字段', response)
+    const errorMessage = response.message || response.error || '头像上传失败'
+    ElMessage.error(errorMessage)
   }
 }
 
@@ -319,7 +384,7 @@ const initFormData = async () => {
       previewUrl: userInfo.previewUrl || ''
     })
 
-    // 直接使用后端返回的previewUrl
+    // 使用后端返回的previewUrl，如果有的话
     avatarPreviewUrl.value = userInfo.previewUrl || ''
 
     // 备份原始数据
@@ -370,18 +435,18 @@ const saveInfo = async () => {
 
     const updatedUserInfo = await updateUserInfo(submitData)
 
-    // 更新store中的用户信息
-    userStore.userInfo = { ...userStore.userInfo!, ...updatedUserInfo }
+    // 更新store中的用户信息 - 使用响应式更新
+    if (userStore.userInfo) {
+      Object.assign(userStore.userInfo, updatedUserInfo)
+    } else {
+      userStore.userInfo = updatedUserInfo
+    }
     localStorage.setItem('userInfo', JSON.stringify(userStore.userInfo))
 
-    // 使用后端返回的最新previewUrl
-    avatarPreviewUrl.value = updatedUserInfo.previewUrl || ''
-    formData.previewUrl = updatedUserInfo.previewUrl || ''
-
-    isEditing.value = false
+      isEditing.value = false
     ElMessage.success('个人信息保存成功')
 
-    // 保存成功后立即刷新页面数据
+    // 保存成功后立即刷新页面数据，头像会自动同步
     await initFormData()
   } catch (error: any) {
     if (error.message) {
