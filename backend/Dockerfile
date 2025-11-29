@@ -32,12 +32,15 @@ FROM openjdk:17-jdk-slim
 # 设置工作目录
 WORKDIR /app
 
-# 安装必要的包
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# 安装必要的包（添加重试机制）
+RUN apt-get update --fix-missing && \
+    for i in 1 2 3; do \
+        apt-get install -y --no-install-recommends \
+            curl \
+            ca-certificates && break || sleep 10; \
+    done && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
 # 创建应用目录
 RUN mkdir -p /opt/apps/dormitory-management/logs
