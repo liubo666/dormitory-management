@@ -741,7 +741,32 @@ const handleSubmit = async () => {
     submitLoading.value = true
 
     if (isEdit.value) {
-      await updateStudent(formData)
+      if (!formData.id) {
+        throw new Error('编辑时学生ID不能为空')
+      }
+      await updateStudent({
+        id: formData.id,
+        studentNo: formData.studentNo,
+        name: formData.name,
+        gender: formData.gender,
+        birthDate: formData.birthDate,
+        idCard: formData.idCard,
+        phone: formData.phone,
+        email: formData.email,
+        college: formData.college,
+        major: formData.major,
+        className: formData.className,
+        grade: formData.grade,
+        enrollmentDate: formData.enrollmentDate,
+        graduationDate: formData.graduationDate,
+        dormitoryId: formData.dormitoryId,
+        bedNo: formData.bedNo,
+        status: formData.status,
+        homeAddress: formData.homeAddress,
+        emergencyContact: formData.emergencyContact,
+        emergencyPhone: formData.emergencyPhone,
+        remark: formData.remark
+      })
       showSuccess('更新成功')
     } else {
       await createStudent(formData)

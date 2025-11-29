@@ -58,7 +58,7 @@ export function getInspectionPage(params: InspectionParams) {
 /**
  * 根据ID查询检查详情
  */
-export function getInspectionById(id: number) {
+export function getInspectionById(id: number): Promise<Inspection> {
   return request({
     url: `/inspection/${id}`,
     method: 'get'

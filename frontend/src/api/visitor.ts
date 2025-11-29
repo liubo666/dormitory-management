@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import type { PageResponse } from '@/utils/request'
 
 // 访客登记接口定义
 export interface Visitor {
@@ -61,7 +62,7 @@ export interface VisitorParams {
 /**
  * 分页查询访客登记记录
  */
-export function getVisitorPage(params: VisitorParams) {
+export function getVisitorPage(params: VisitorParams): Promise<PageResponse<Visitor>> {
   return request({
     url: '/visitor/page',
     method: 'post',
@@ -72,7 +73,7 @@ export function getVisitorPage(params: VisitorParams) {
 /**
  * 根据ID查询访客登记详情
  */
-export function getVisitorById(id: number) {
+export function getVisitorById(id: number): Promise<Visitor> {
   return request({
     url: `/visitor/${id}`,
     method: 'get'

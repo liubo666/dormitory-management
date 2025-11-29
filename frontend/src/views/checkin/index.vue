@@ -917,7 +917,10 @@ const handleSubmitCheckout = async () => {
 
   submitting.value = true
   try {
-    await checkout(currentRecord.value.id, checkoutForm.checkoutReason)
+    await checkout({
+      id: currentRecord.value.id,
+      checkoutReason: checkoutForm.checkoutReason
+    })
     ElMessage.success('退宿成功')
     showCheckoutDialog.value = false
     loadData()
@@ -937,7 +940,10 @@ const handleCancel = (row: CheckIn) => {
     type: 'warning'
   }).then(async () => {
     try {
-      await cancelApplication(row.id, '用户主动取消')
+      await cancelApplication({
+      id: row.id,
+      reason: '用户主动取消'
+    })
       ElMessage.success('申请取消成功')
       loadData()
       loadStatistics()
@@ -1040,7 +1046,10 @@ const handleBatchCheckout = () => {
     try {
       const ids = selectedRows.value.map(row => row.id)
       for (const id of ids) {
-        await checkout(id, '批量退宿')
+        await checkout({
+        id: id,
+        checkoutReason: '批量退宿'
+      })
       }
       ElMessage.success('批量退宿成功')
       loadData()

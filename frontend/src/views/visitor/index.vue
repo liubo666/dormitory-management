@@ -400,8 +400,8 @@ const isEdit = ref(false)
 const currentRecord = ref<Visitor | null>(null)
 
 // 选项数据
-const dormitoryOptions = ref<{label: string, value: number}[]>([])
-const studentOptions = ref<{label: string, value: number}[]>([])
+const dormitoryOptions = ref<{label: string, value: number, buildingName?: string, roomNo?: string}[]>([])
+const studentOptions = ref<{label: string, value: number, studentNo?: string, name?: string}[]>([])
 const selectedStudent = ref<number | null>(null)
 const selectedDormitory = ref<number | null>(null)
 const studentSearchLoading = ref(false)
@@ -441,7 +441,7 @@ const form = reactive<VisitorForm>({
   visitorIdCard: '',
   visitStudentName: '',
   visitStudentNo: '',
-  roomId: null as any,
+  roomId: 0,
   visitPurpose: '',
   expectedVisitTime: '',
   actualArrivalTime: '',
@@ -493,9 +493,9 @@ const loadData = async () => {
     }
 
     const response = await getVisitorPage(params)
-    if (response && typeof response === 'object') {
-      tableData.value = (response as any).records || []
-      pagination.total = (response as any).total || 0
+    if (response && typeof response === 'object' && 'records' in response) {
+      tableData.value = response.records || []
+      pagination.total = response.total || 0
     } else {
       tableData.value = []
       pagination.total = 0
@@ -571,15 +571,15 @@ const handleStudentSearch = async (query: string) => {
 
     // 处理后端返回的数据结构，后端返回的是 IPage<StudentSearchVO>
     // response已经是响应拦截器解包后的data字段
-    let students = []
+    let students: any[] = []
 
     // 尝试多种可能的数据结构
-    if (response && response.records) {
-      students = response.records
+    if (response && typeof response === 'object' && 'records' in response) {
+      students = (response as any).records || []
     } else if (Array.isArray(response)) {
       students = response
-    } else if (response && Array.isArray(response.data)) {
-      students = response.data
+    } else if (response && Array.isArray((response as any).data)) {
+      students = (response as any).data
     }
 
     studentOptions.value = students.map((item: any) => ({
@@ -601,7 +601,7 @@ const handleDormitoryChange = (dormitoryId: number) => {
   if (selectedDormitoryData) {
     form.roomId = dormitoryId
   } else {
-    form.roomId = null as any
+    form.roomId = 0
   }
 }
 
@@ -609,8 +609,8 @@ const handleDormitoryChange = (dormitoryId: number) => {
 const handleStudentChange = (studentId: number) => {
   const selectedStudentData = studentOptions.value.find(s => s.value === studentId)
   if (selectedStudentData) {
-    form.visitStudentName = selectedStudentData.name
-    form.visitStudentNo = selectedStudentData.studentNo
+    form.visitStudentName = selectedStudentData.name || ''
+    form.visitStudentNo = selectedStudentData.studentNo || ''
   } else {
     form.visitStudentName = ''
     form.visitStudentNo = ''
@@ -664,7 +664,7 @@ const openAddDialog = async () => {
     visitorIdCard: '',
     visitStudentName: '',
     visitStudentNo: '',
-    roomId: null as any,
+    roomId: 0,
     visitPurpose: '',
     expectedVisitTime: '',
     actualArrivalTime: '',
@@ -828,9 +828,9 @@ const handleSubmit = async () => {
     submitting.value = true
 
     // 准备提交数据，确保数据类型正确
-    const submitData = {
+    const submitData: VisitorForm = {
       ...form,
-      roomId: form.roomId ? String(form.roomId) : null  // 确保roomId是字符串类型（后端期望）
+      roomId: form.roomId as number  // 确保roomId是number类型
     }
 
     if (isEdit.value) {

@@ -245,10 +245,17 @@ const customUpload = async (options: UploadRequestOptions) => {
     const xhr = new XMLHttpRequest()
 
     // 监听上传进度
-    xhr.upload.addEventListener('progress', (event: any) => {
+    xhr.upload.addEventListener('progress', (event: ProgressEvent) => {
       if (event.lengthComputable) {
         const percentCompleted = Math.round((event.loaded * 100) / event.total)
-        onProgress({ percent: percentCompleted })
+        onProgress({
+          percent: percentCompleted,
+          lengthComputable: true,
+          loaded: event.loaded,
+          total: event.total,
+          target: xhr,
+          currentTarget: xhr.upload
+        } as any)
       }
     })
 
@@ -277,7 +284,13 @@ const customUpload = async (options: UploadRequestOptions) => {
           if (response) {
             onSuccess(response)
           } else {
-            onError(new Error('响应对象为空'))
+            onError({
+              status: xhr.status,
+              method: 'POST',
+              url: uploadUrl,
+              message: '响应对象为空',
+              name: 'EmptyResponseError'
+            } as any)
           }
         } catch (e) {
           // 如果解析失败，但状态码是成功的，可能是纯文本响应
@@ -299,16 +312,34 @@ const customUpload = async (options: UploadRequestOptions) => {
               console.error('文本处理也失败:', textError)
             }
           }
-          onError(new Error(`响应解析失败: ${e.message}，原始响应: ${xhr.responseText}`))
+          onError({
+            status: xhr.status,
+            method: 'POST',
+            url: uploadUrl,
+            message: `响应解析失败: ${(e as Error).message}，原始响应: ${xhr.responseText}`,
+            name: 'ParseError'
+          } as any)
         }
       } else {
-        onError(new Error(`上传失败，状态码: ${xhr.status}, 响应: ${xhr.responseText}`))
+        onError({
+          status: xhr.status,
+          method: 'POST',
+          url: uploadUrl,
+          message: `上传失败，状态码: ${xhr.status}, 响应: ${xhr.responseText}`,
+          name: 'UploadError'
+        } as any)
       }
     })
 
     // 监听错误
     xhr.addEventListener('error', () => {
-      onError(new Error('网络错误'))
+      onError({
+        status: 0,
+        method: 'POST',
+        url: uploadUrl,
+        message: '网络错误',
+        name: 'NetworkError'
+      } as any)
     })
 
     // 配置并发送请求

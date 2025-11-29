@@ -77,7 +77,7 @@ export function getRepairPage(params: RepairParams) {
 /**
  * 根据ID查询报修详情
  */
-export function getRepairById(id: number) {
+export function getRepairById(id: number): Promise<Repair> {
   return request({
     url: `/repair/${id}`,
     method: 'get'

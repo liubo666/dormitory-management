@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import type { PageResponse } from '@/utils/request'
 
 export interface RegistrationApplicationDTO {
   username: string
@@ -34,7 +35,7 @@ export const submitRegistration = (data: RegistrationApplicationDTO) => {
 }
 
 // 验证管理员工号
-export const validateAdminEmployeeNo = (employeeNo: string) => {
+export const validateAdminEmployeeNo = (employeeNo: string): Promise<boolean> => {
   return request.get(`/registration/validate-admin/${employeeNo}`)
 }
 
@@ -43,12 +44,12 @@ export const getRegistrationApplications = (params: {
   current: number
   size: number
   status?: number
-}) => {
+}): Promise<PageResponse<RegistrationApplicationVO>> => {
   return request.get('/registration/admin/applications', { params })
 }
 
 // 根据审批token获取申请详情
-export const getApplicationByToken = (token: string) => {
+export const getApplicationByToken = (token: string): Promise<RegistrationApplicationVO> => {
   return request.get(`/registration/application/${token}`)
 }
 

@@ -39,7 +39,8 @@
       "Bash(npx kill-port:*)",
       "Bash(docker-compose stop:*)",
       "Bash(docker ps:*)",
-      "Bash(docker-compose restart:*)"
+      "Bash(docker-compose restart:*)",
+      "Bash(npx vue-tsc:*)"
     ],
     "deny": [],
     "ask": []

@@ -276,7 +276,7 @@ const approveApplication = async (row: RegistrationApplicationVO) => {
       }
     )
 
-    await approveApp(row.id) // 这里需要使用token，简化实现使用ID
+    await approveApp(row.applicationNo) // 使用applicationNo作为审批token
     ElMessage.success('审批通过')
     loadData()
     closeDetailDialog()
@@ -303,7 +303,7 @@ const confirmReject = async () => {
 
   try {
     rejectDialog.loading = true
-    await rejectApp(rejectDialog.application!.id, rejectDialog.form.reason) // 这里需要使用token，简化实现使用ID
+    await rejectApp(rejectDialog.application!.applicationNo, rejectDialog.form.reason) // 使用applicationNo作为审批token
     ElMessage.success('申请已驳回')
     rejectDialog.visible = false
     loadData()
