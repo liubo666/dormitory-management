@@ -74,6 +74,9 @@ minio:
   access-key: admin
   secret-key: Admin@123456
   bucket-name: dormitory-avatars
+  secure: false
+  use-proxy: true
+  external-url: http://106.12.152.221/files
 
 
 
