@@ -33,9 +33,11 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # 安装必要的包
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # 创建应用目录
 RUN mkdir -p /opt/apps/dormitory-management/logs
